@@ -6,23 +6,29 @@
     <title>Document</title>
 </head>
 <body>
-    {% extends "base.html" %}
+{% extends "base.html" %}
 {% block content %}
-<h1>Create New Assignment</h1>
-<form method="POST" action="{{ url_for('create_assignment') }}">
-    <label for="title">Title</label>
-    <input type="text" id="title" name="title" required>
+<div class="dashboard-container">
+    <div class="header-section">
+        <a href="{{ url_for('dashboard') }}" class="back-link">&larr; Back to Dashboard</a>
+        <h1 class="page-title">Create New Assignment</h1>
+    </div>
     
-    <label for="description">Description</label>
-    <textarea id="description" name="description" rows="5" required></textarea>
-    
-    <label for="due_date">Due Date</label>
-    <input type="date" id="due_date" name="due_date" required>
-    
-    <button type="submit">Create Assignment</button>
-</form>
-<div class="links">
-    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+    <form method="POST" action="{{ url_for('create_assignment') }}" enctype="multipart/form-data">
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" required>
+        
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="5" required></textarea>
+        
+        <label for="due_date">Due Date</label>
+        <input type="date" id="due_date" name="due_date" required>
+
+        <label for="file">Assignment File (PDF or Word)</label>
+        <input type="file" id="file" name="file" required>
+        
+        <button type="submit" class="create-btn">Create Assignment</button>
+    </form>
 </div>
 {% endblock %}
 

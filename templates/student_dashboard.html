@@ -8,42 +8,48 @@
 <body>
 {% extends "base.html" %}
 {% block content %}
-<h1>Student Dashboard</h1>
-<p>Welcome, {{ username }}! You have joined class: <strong>{{ class_code }}</strong>.</p>
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1>Student Dashboard</h1>
+        <p>Welcome, {{ username }}!</p>
+        <a href="{{ url_for('logout') }}" class="logout-btn">Log Out</a>
+    </header>
 
-<div class="tabs">
-    <button class="tab-button active" data-tab="assignments">Assignments</button>
-    <button class="tab-button" data-tab="teachers">Teachers</button>
-</div>
-
-<div id="assignments" class="tab-content active">
-    <h2>Assignments</h2>
-    <div class="assignments-list">
-        {% if assignments %}
-            {% for assignment in assignments %}
-                <div class="assignment-card">
-                    <h3>{{ assignment.title }}</h3>
-                    <p>{{ assignment.description }}</p>
-                    <p class="due-date">Due: {{ assignment.due_date }}</p>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p>No assignments have been assigned yet.</p>
-        {% endif %}
+    <div class="tabs">
+        <button class="tab-button active" data-tab="assignments">Assignments</button>
+        <button class="tab-button" data-tab="teachers">Teachers</button>
     </div>
-</div>
 
-<div id="teachers" class="tab-content">
-    <h2>Teachers in your class</h2>
-    <ul class="user-list">
-        {% for teacher in teachers %}
-        <li>{{ teacher.username }}</li>
-        {% endfor %}
-    </ul>
-</div>
+    <div id="assignments" class="tab-content active">
+        <div class="tab-header">
+            <h2>Assignments</h2>
+            <p>Class Code: <strong>{{ class_code }}</strong></p>
+        </div>
+        <div class="assignments-list">
+            {% if assignments %}
+                {% for assignment in assignments %}
+                    <a href="{{ url_for('assignment_detail', assignment_id=assignment._id) }}" class="assignment-card">
+                        <h3>{{ assignment.title }}</h3>
+                        <p>{{ assignment.description }}</p>
+                        <p class="due-date">Due: {{ assignment.due_date }}</p>
+                    </a>
+                {% endfor %}
+            {% else %}
+                <p class="no-content">No assignments have been assigned yet.</p>
+            {% endif %}
+        </div>
+    </div>
 
-<div class="links">
-    <a href="{{ url_for('logout') }}">Log Out</a>
+    <div id="teachers" class="tab-content">
+        <div class="tab-header">
+            <h2>Teachers in your class</h2>
+        </div>
+        <ul class="user-list">
+            {% for teacher in teachers %}
+            <li>{{ teacher.username }}</li>
+            {% endfor %}
+        </ul>
+    </div>
 </div>
 
 <script>

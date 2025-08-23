@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% extends "base.html" %}
+{% block content %}
+<div class="detail-container">
+    <div class="header-section">
+        <a href="{{ url_for('dashboard') }}" class="back-link">&larr; Back to Dashboard</a>
+        <h1 class="page-title">{{ assignment.title }}</h1>
+        <p class="due-date">Due: {{ assignment.due_date }}</p>
+    </div>
+
+    <div class="assignment-section">
+        <h2>Assignment Details</h2>
+        <p class="description">{{ assignment.description }}</p>
+        <a href="{{ url_for('download_assignment', assignment_id=assignment._id) }}" class="download-btn">Download Questions</a>
+    </div>
+
+    <div class="submission-section">
+        <h2>Your Submission</h2>
+        {% if submission %}
+            <div class="submission-status">
+                <p class="status-message success">You have successfully submitted this assignment.</p>
+                <p><strong>File:</strong> {{ submission.filename }}</p>
+                <p><strong>Uploaded on:</strong> {{ submission.upload_date }}</p>
+                <p class="note">You can upload a new file to replace your previous submission.</p>
+            </div>
+        {% else %}
+            <div class="submission-status">
+                <p class="status-message">You have not submitted this assignment yet.</p>
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('upload_submission', assignment_id=assignment._id) }}" enctype="multipart/form-data">
+            <label for="submission-file">Upload your answers (PDF or Word file)</label>
+            <input type="file" id="submission-file" name="file" required>
+            <button type="submit" class="upload-btn">
+                {% if submission %}
+                    Update Submission
+                {% else %}
+                    Submit Assignment
+                {% endif %}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+</body>
+</html>
