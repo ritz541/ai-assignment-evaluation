@@ -6,7 +6,7 @@
     <title>Singup</title>
 </head>
 <body>
-    {% extends "base.html" %}
+{% extends "base.html" %}
 {% block content %}
 <h1>Sign Up</h1>
 <form method="POST" action="{{ url_for('signup') }}">
@@ -23,11 +23,37 @@
             Teacher
         </label>
     </p>
+    <input type="text" id="class_code_input" name="class_code" placeholder="Enter Class Code" required>
     <button type="submit">Register</button>
 </form>
 <div class="links">
     <p>Already have an account? <a href="{{ url_for('login') }}">Log In</a></p>
 </div>
+
+<script>
+    // Get the radio buttons and the class code input field
+    const studentRadio = document.querySelector('input[name="user_type"][value="student"]');
+    const teacherRadio = document.querySelector('input[name="user_type"][value="teacher"]');
+    const classCodeInput = document.getElementById('class_code_input');
+
+    // Function to toggle the visibility and required status of the class code input
+    function toggleClassCodeInput() {
+        if (studentRadio.checked) {
+            classCodeInput.style.display = 'block';
+            classCodeInput.required = true;
+        } else {
+            classCodeInput.style.display = 'none';
+            classCodeInput.required = false;
+        }
+    }
+
+    // Set the initial state on page load
+    toggleClassCodeInput();
+
+    // Add event listeners to the radio buttons
+    studentRadio.addEventListener('change', toggleClassCodeInput);
+    teacherRadio.addEventListener('change', toggleClassCodeInput);
+</script>
 {% endblock %}
 
 </body>

@@ -6,11 +6,11 @@
     <title>Teacher Dashboard</title>
 </head>
 <body>
-    {% extends "base.html" %}
+{% extends "base.html" %}
 {% block content %}
 <h1>Teacher Dashboard</h1>
 <p>Welcome, {{ username }}! This is your special dashboard for teachers.</p>
-<p>From here, you can manage your students, view class progress, and create assignments.</p>
+<p>Your class code is: <strong>{{ class_code }}</strong>. Share this with your students to have them join your class!</p>
 <div class="links">
     <a href="{{ url_for('logout') }}">Log Out</a>
 </div>
