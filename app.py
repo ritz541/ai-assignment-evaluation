@@ -1,3 +1,6 @@
+# To run this application, you will need to install the following libraries:
+# pip install Flask pymongo werkzeug python-dotenv
+
 import os
 from flask import Flask, request, render_template, redirect, url_for, flash, session
 from pymongo import MongoClient
@@ -9,10 +12,12 @@ load_dotenv()
 
 # --- Flask App Configuration ---
 app = Flask(__name__)
-
+# A secret key is required for sessions and flashing messages
+# It is now loaded from the .env file
 app.secret_key = os.environ.get('FLASK_SECRET_KEY')
 
 # --- MongoDB Configuration ---
+# The connection URI is now loaded from the .env file
 MONGO_URI = os.environ.get('MONGO_URI')
 DB_NAME = 'user_auth_db'
 
@@ -41,10 +46,14 @@ def home():
 def signup():
     """Handles user registration."""
     if request.method == 'POST':
+        # if not users_collection:
+        #     flash('Database connection error.', 'error')
+        #     return redirect(url_for('signup'))
 
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
+        user_type = request.form.get('user_type') # Get the new user type from the form
 
         # Check if email already exists
         if users_collection.find_one({'email': email}):
@@ -54,11 +63,12 @@ def signup():
         # Hash the password for security
         hashed_password = generate_password_hash(password)
 
-        # Save the new user to the database
+        # Save the new user to the database, including the user_type
         users_collection.insert_one({
             'username': username,
             'email': email,
-            'password': hashed_password
+            'password': hashed_password,
+            'user_type': user_type # Store the user type
         })
 
         flash('Your account has been created successfully! Please log in.', 'success')
@@ -71,6 +81,9 @@ def signup():
 def login():
     """Handles user login."""
     if request.method == 'POST':
+        # if not users_collection:
+        #     flash('Database connection error.', 'error')
+        #     return redirect(url_for('login'))
 
         email = request.form.get('email')
         password = request.form.get('password')
@@ -80,10 +93,11 @@ def login():
 
         # Check if user exists and password is correct
         if user and check_password_hash(user['password'], password):
-            # Store user info in the session
+            # Store user info and their type in the session
             session['logged_in'] = True
             session['username'] = user['username']
             session['email'] = user['email']
+            session['user_type'] = user['user_type'] # Store the user type
             flash('Logged in successfully!', 'success')
             return redirect(url_for('dashboard'))
         else:
@@ -101,8 +115,17 @@ def dashboard():
         return redirect(url_for('login'))
     
     username = session.get('username')
-    # render_template now points to a file in the 'templates' folder
-    return render_template("dashboard.html", title="Dashboard", username=username)
+    user_type = session.get('user_type') # Get the user type from the session
+    
+    # Conditional rendering based on user type
+    if user_type == 'teacher':
+        return render_template("teacher_dashboard.html", title="Teacher Dashboard", username=username)
+    elif user_type == 'student':
+        return render_template("student_dashboard.html", title="Student Dashboard", username=username)
+    else:
+        # Fallback for unexpected user types
+        flash('Unexpected user type.', 'error')
+        return redirect(url_for('logout'))
 
 @app.route('/logout')
 def logout():
@@ -110,10 +133,11 @@ def logout():
     session.pop('logged_in', None)
     session.pop('username', None)
     session.pop('email', None)
+    session.pop('user_type', None) # Clear the user type from the session
     flash('You have been logged out.', 'success')
     return redirect(url_for('home'))
 
 # --- Run the App ---
 if __name__ == '__main__':
     # You can change host and port as needed
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

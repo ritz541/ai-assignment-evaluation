@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard</title>
+</head>
+<body>
+    {% extends "base.html" %}
+{% block content %}
+<h1>Teacher Dashboard</h1>
+<p>Welcome, {{ username }}! This is your special dashboard for teachers.</p>
+<p>From here, you can manage your students, view class progress, and create assignments.</p>
+<div class="links">
+    <a href="{{ url_for('logout') }}">Log Out</a>
+</div>
+{% endblock %}
+
+</body>
+</html>
