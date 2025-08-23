@@ -8,8 +8,8 @@ class User(UserMixin):
         self.username = user_data.get('username')
         self.email = user_data.get('email')
         self.user_type = user_data.get('user_type')
-        self.class_name = user_data.get('class_name') # Now using class_name
-        self.subject = user_data.get('subject') # Teachers have a subject
+        self.class_name = user_data.get('class_name')
+        self.subject = user_data.get('subject')
 
     def get_id(self):
         return self.id
@@ -21,11 +21,12 @@ class Assignment:
         self.title = assignment_data.get('title')
         self.description = assignment_data.get('description')
         self.due_date = assignment_data.get('due_date')
-        self.class_name = assignment_data.get('class_name') # Now using class_name
-        self.subject = assignment_data.get('subject') # Assignments are linked to a subject
+        self.class_name = assignment_data.get('class_name')
+        self.subject = assignment_data.get('subject')
         self.teacher_id = assignment_data.get('teacher_id')
         self.filename = assignment_data.get('filename')
         self.file_path = assignment_data.get('file_path')
+        self.reference_file_path = assignment_data.get('reference_file_path') # New field for reference answers
 
 class Submission:
     def __init__(self, submission_data):
@@ -33,7 +34,9 @@ class Submission:
         self.id = str(submission_data['_id'])
         self.assignment_id = submission_data.get('assignment_id')
         self.student_id = submission_data.get('student_id')
-        self.class_name = submission_data.get('class_name') # Added class_name to the Submission model
+        self.class_name = submission_data.get('class_name')
         self.filename = submission_data.get('filename')
         self.file_path = submission_data.get('file_path')
         self.upload_date = submission_data.get('upload_date')
+        self.ai_score = submission_data.get('ai_score') # New field for AI score
+        self.ai_remarks = submission_data.get('ai_remarks') # New field for AI remarks

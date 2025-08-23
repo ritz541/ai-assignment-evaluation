@@ -1,4 +1,5 @@
 import os
+import json
 import secrets
 from flask import render_template, request, redirect, url_for, flash, session, send_from_directory
 from flask_login import login_user, logout_user, login_required, current_user
@@ -7,6 +8,8 @@ from werkzeug.utils import secure_filename
 from bson.objectid import ObjectId
 from datetime import datetime
 from models import User, Assignment, Submission
+from tika import parser
+from gemini_api import evaluate_submission_with_gemini
 
 def register_routes(app):
     @app.route('/')
@@ -30,7 +33,6 @@ def register_routes(app):
                 flash('An account with this email already exists.', 'warning')
                 return redirect(url_for('signup'))
             
-            # All users select their class from the dropdown
             class_name = request.form.get('class_name')
             
             user_data = {
@@ -86,14 +88,12 @@ def register_routes(app):
         user_type = current_user.user_type
         class_name = current_user.class_name
         
-        # Fetch user details for display
         teachers_docs = list(app.db.users.find({'user_type': 'teacher', 'class_name': class_name}))
         students_docs = list(app.db.users.find({'user_type': 'student', 'class_name': class_name}))
         
         teachers = [User(doc) for doc in teachers_docs]
         students = [User(doc) for doc in students_docs]
         
-        # FIX: The assignment query now filters by both class_name and the current teacher's ID
         assignments_docs = []
         if user_type == 'teacher':
             assignments_docs = list(app.db.assignments.find({
@@ -107,7 +107,6 @@ def register_routes(app):
             
         assignments = [Assignment(doc) for doc in assignments_docs]
 
-        # For student dashboard, check for submissions to change assignment appearance
         submitted_assignment_ids = []
         if user_type == 'student':
             student_id = current_user.get_id()
@@ -115,7 +114,6 @@ def register_routes(app):
                 str(s.get('assignment_id')) for s in app.db.submissions.find({'student_id': student_id}, {'assignment_id': 1})
             ]
         
-        # For teacher dashboard, get submission counts
         assignment_stats = {}
         if user_type == 'teacher':
             total_students_in_class = len(students)
@@ -154,35 +152,45 @@ def register_routes(app):
             description = request.form.get('description')
             due_date = request.form.get('due_date')
             file = request.files['file']
+            reference_file = request.files['reference_file']
 
-            if file and app.config['ALLOWED_EXTENSIONS'] and file.filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']:
-                filename = secure_filename(file.filename)
-                
+            if file and app.config['ALLOWED_EXTENSIONS'] and file.filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS'] \
+               and reference_file and app.config['ALLOWED_EXTENSIONS'] and reference_file.filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']:
+
                 assignment_id = app.db.assignments.insert_one({
                     'title': title,
                     'description': description,
                     'due_date': due_date,
                     'class_name': current_user.class_name,
-                    'subject': current_user.subject, # Link to the teacher's subject
+                    'subject': current_user.subject,
                     'teacher_id': current_user.get_id(),
-                    'filename': filename,
-                    'file_path': ''
+                    'filename': secure_filename(file.filename),
+                    'file_path': '',
+                    'reference_filename': secure_filename(reference_file.filename),
+                    'reference_file_path': ''
                 }).inserted_id
                 
                 assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], 'assignments', str(assignment_id))
                 os.makedirs(assignment_path, exist_ok=True)
-                file_path = os.path.join(assignment_path, filename)
+
+                file_path = os.path.join(assignment_path, secure_filename(file.filename))
                 file.save(file_path)
+
+                reference_file_path = os.path.join(assignment_path, secure_filename(reference_file.filename))
+                reference_file.save(reference_file_path)
 
                 app.db.assignments.update_one(
                     {'_id': ObjectId(assignment_id)},
-                    {'$set': {'file_path': file_path}}
+                    {'$set': {
+                        'file_path': file_path,
+                        'reference_file_path': reference_file_path
+                    }}
                 )
 
                 flash('Assignment created successfully!', 'success')
                 return redirect(url_for('dashboard'))
             else:
-                flash('Invalid file type. Please upload a PDF or Word document.', 'warning')
+                flash('Invalid file type. Please upload PDF or Word documents for both assignment and reference files.', 'warning')
                 return redirect(url_for('create_assignment'))
         
         return render_template('create_assignment.html', title="Create Assignment")
@@ -205,7 +213,6 @@ def register_routes(app):
         submission_doc = app.db.submissions.find_one({'assignment_id': assignment_id, 'student_id': current_user.get_id()})
         submission = Submission(submission_doc) if submission_doc else None
 
-        # Pass the user type to the template to conditionally show/hide the submission form
         return render_template('assignment_detail.html', title=assignment.title, assignment=assignment, submission=submission, user_type=current_user.user_type)
 
     @app.route('/download/assignment/<assignment_id>')
@@ -231,6 +238,34 @@ def register_routes(app):
         filename = os.path.basename(assignment.file_path)
 
         return send_from_directory(directory, filename, as_attachment=True)
+    
+    @app.route('/download/reference/<assignment_id>')
+    @login_required
+    def download_reference(assignment_id):
+        if current_user.user_type != 'teacher':
+            flash('Unauthorized access.', 'danger')
+            return redirect(url_for('dashboard'))
+        
+        if app.db is None:
+            flash('Database connection error.', 'danger')
+            return redirect(url_for('dashboard'))
+            
+        assignment_doc = app.db.assignments.find_one({'_id': ObjectId(assignment_id)})
+        
+        if not assignment_doc or not assignment_doc.get('reference_file_path'):
+            flash('Reference file not found.', 'warning')
+            return redirect(url_for('dashboard'))
+        
+        assignment = Assignment(assignment_doc)
+
+        if assignment.class_name != current_user.class_name:
+            flash('You do not have permission to download this file.', 'danger')
+            return redirect(url_for('dashboard'))
+
+        directory = os.path.dirname(assignment.reference_file_path)
+        filename = os.path.basename(assignment.reference_file_path)
+
+        return send_from_directory(directory, filename, as_attachment=True)
 
     @app.route('/submissions/<assignment_id>')
     @login_required
@@ -248,16 +283,69 @@ def register_routes(app):
             flash('Assignment not found or you do not have access.', 'danger')
             return redirect(url_for('dashboard'))
         
-        # Fetch submissions for this specific assignment
         submissions_docs = list(app.db.submissions.find({'assignment_id': assignment_id}))
         submissions = [Submission(doc) for doc in submissions_docs]
 
-        # Fetch student usernames for each submission
         for submission in submissions:
             student_doc = app.db.users.find_one({'_id': ObjectId(submission.student_id)})
             submission.student_username = student_doc['username'] if student_doc else 'Unknown'
 
         return render_template('submissions_list.html', title='Submissions', submissions=submissions, assignment_title=assignment['title'])
+
+    @app.route('/grade_submission/<submission_id>', methods=['POST'])
+    @login_required
+    def grade_submission(submission_id):
+        if current_user.user_type != 'teacher':
+            flash('Unauthorized access.', 'danger')
+            return redirect(url_for('dashboard'))
+            
+        submission_doc = app.db.submissions.find_one({'_id': ObjectId(submission_id)})
+        if not submission_doc:
+            flash('Submission not found.', 'warning')
+            return redirect(url_for('dashboard'))
+
+        assignment_doc = app.db.assignments.find_one({'_id': ObjectId(submission_doc['assignment_id'])})
+        if not assignment_doc:
+            flash('Assignment not found for this submission.', 'warning')
+            return redirect(url_for('dashboard'))
+        
+        # Use Tika to extract text from the files
+        try:
+            student_text = parser.from_file(submission_doc['file_path'])['content']
+            reference_text = parser.from_file(assignment_doc['reference_file_path'])['content']
+        except Exception as e:
+            flash(f'Error extracting text from files: {e}', 'danger')
+            return redirect(url_for('view_submissions', assignment_id=submission_doc['assignment_id']))
+
+        # Call the Gemini API to evaluate
+        gemini_response_text = evaluate_submission_with_gemini(
+            question=assignment_doc['title'],
+            reference_answer=reference_text,
+            student_answer=student_text
+        )
+
+        if gemini_response_text:
+            try:
+                gemini_response_json = json.loads(gemini_response_text)
+                score = gemini_response_json.get('score', 'N/A')
+                remarks = gemini_response_json.get('remarks', 'No remarks provided.')
+                
+                # Update the submission document with AI-generated data
+                app.db.submissions.update_one(
+                    {'_id': ObjectId(submission_id)},
+                    {'$set': {
+                        'ai_score': score,
+                        'ai_remarks': remarks,
+                        'ai_graded_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    }}
+                )
+                flash('AI evaluation completed successfully!', 'success')
+            except json.JSONDecodeError:
+                flash('AI response was not in a valid JSON format.', 'danger')
+        else:
+            flash('Failed to get a response from the AI.', 'danger')
+        
+        return redirect(url_for('view_submissions', assignment_id=submission_doc['assignment_id']))
 
 
     @app.route('/download/submission/<submission_id>')
@@ -279,7 +367,6 @@ def register_routes(app):
 
         submission = Submission(submission_doc)
         
-        # Verify the teacher is in the same class as the student who submitted
         if submission.class_name != current_user.class_name:
             flash('You do not have permission to download this submission.', 'danger')
             return redirect(url_for('dashboard'))
@@ -330,7 +417,7 @@ def register_routes(app):
                 app.db.submissions.insert_one({
                     'assignment_id': assignment_id,
                     'student_id': student_id,
-                    'class_name': current_user.class_name, # Use class_name here
+                    'class_name': current_user.class_name,
                     'filename': filename,
                     'file_path': file_path,
                     'upload_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')

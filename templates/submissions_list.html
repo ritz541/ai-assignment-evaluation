@@ -15,13 +15,24 @@
 
         <div class="space-y-4">
             {% for submission in submissions %}
-            <div class="bg-gray-100 p-6 rounded-2xl shadow-md flex justify-between items-center">
+            <div class="bg-gray-100 p-6 rounded-2xl shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center">
                 <div>
                     <h3 class="text-xl font-bold text-gray-800">{{ submission.student_username }}</h3>
-                    <p class="text-gray-600 mt-1">Submitted: {{ submission.filename }}</p>
+                    <p class="text-gray-600 mt-1">File: {{ submission.filename }}</p>
                     <p class="text-sm text-gray-500">Uploaded on: {{ submission.upload_date }}</p>
+                    {% if submission.ai_score %}
+                    <div class="mt-2 text-sm font-semibold">
+                        <span class="text-green-600">AI Score: {{ submission.ai_score }}</span>
+                        <p class="text-gray-700 mt-1">Remarks: {{ submission.ai_remarks }}</p>
+                    </div>
+                    {% endif %}
                 </div>
-                <a href="{{ url_for('download_submission', submission_id=submission.id) }}" class="bg-green-500 text-white text-sm px-4 py-2 rounded-lg font-bold hover:bg-green-600 transition-colors">Download</a>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-4 sm:mt-0">
+                    <form method="POST" action="{{ url_for('grade_submission', submission_id=submission.id) }}">
+                        <button type="submit" class="w-full sm:w-auto bg-purple-500 text-white text-sm px-4 py-2 rounded-lg font-bold hover:bg-purple-600 transition-colors">Grade with AI</button>
+                    </form>
+                    <a href="{{ url_for('download_submission', submission_id=submission.id) }}" class="w-full sm:w-auto bg-green-500 text-white text-sm text-center px-4 py-2 rounded-lg font-bold hover:bg-green-600 transition-colors">Download</a>
+                </div>
             </div>
             {% else %}
             <div class="text-center p-8 text-gray-500">

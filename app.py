@@ -5,6 +5,10 @@ from pymongo import MongoClient
 from routes import register_routes
 from models import User
 from bson.objectid import ObjectId
+from dotenv import load_dotenv
+
+# We will need the `tika` library to extract text from PDFs and DOCX files.
+from tika import parser
 
 # --- Flask App Configuration ---
 app = Flask(__name__)
