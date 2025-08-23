@@ -1,0 +1,51 @@
+/* Import the base styles */
+@import url('base.css');
+
+/* Styles for the dashboards */
+.class-lists {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.list-container {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+    flex-grow: 1;
+    min-width: 200px;
+}
+
+.list-container h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: #555;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.list-container ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.list-container li {
+    background: #fff;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .class-lists {
+        flex-direction: column;
+    }
+}

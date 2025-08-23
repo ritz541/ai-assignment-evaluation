@@ -1,8 +1,11 @@
+# To run this application, you will need to install the following libraries:
+# pip install Flask pymongo werkzeug python-dotenv secrets
 
 import os
-import secrets # Used for generating secure, unique class codes
+import secrets
 from flask import Flask, request, render_template, redirect, url_for, flash, session
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 
@@ -11,26 +14,23 @@ load_dotenv()
 
 # --- Flask App Configuration ---
 app = Flask(__name__)
-# A secret key is required for sessions and flashing messages
-# It is now loaded from the .env file
 app.secret_key = os.environ.get('FLASK_SECRET_KEY')
 
 # --- MongoDB Configuration ---
-# The connection URI is now loaded from the .env file
 MONGO_URI = os.environ.get('MONGO_URI')
 DB_NAME = 'user_auth_db'
 
 try:
-    # Attempt to connect to MongoDB
     client = MongoClient(MONGO_URI)
     db = client[DB_NAME]
     users_collection = db['users']
+    classes_collection = db['classes'] # New collection for classes
     print("Successfully connected to MongoDB.")
 except Exception as e:
-    # Handle connection errors
     print(f"Error connecting to MongoDB: {e}")
     client = None
     users_collection = None
+    classes_collection = None
 
 # --- Helper Function ---
 def generate_class_code():
@@ -43,54 +43,70 @@ def generate_class_code():
 @app.route('/home')
 def home():
     """Renders the home page."""
-    # render_template now points to a file in the 'templates' folder
     return render_template("home.html", title="Home")
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     """Handles user registration."""
     if request.method == 'POST':
-        # if not users_collection:
-        #     flash('Database connection error.', 'error')
-        #     return redirect(url_for('signup'))
+        # FIX: Changed the truthiness check to an explicit comparison with None.
+        if users_collection is None or classes_collection is None:
+            flash('Database connection error.', 'error')
+            return redirect(url_for('signup'))
 
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
-        user_type = request.form.get('user_type') # Get the user type from the form
+        user_type = request.form.get('user_type')
         
         class_code = None
 
-        # Check if email already exists
         if users_collection.find_one({'email': email}):
             flash('An account with this email already exists.', 'error')
             return redirect(url_for('signup'))
         
         if user_type == 'teacher':
-            # Teachers get a new class code
-            class_code = generate_class_code()
-            # Check for a unique class code in a rare case of collision
-            while users_collection.find_one({'class_code': class_code}):
+            teacher_action = request.form.get('teacher_action')
+            if teacher_action == 'create':
                 class_code = generate_class_code()
+                # Check for a unique class code in a rare case of collision
+                while classes_collection.find_one({'class_code': class_code}):
+                    class_code = generate_class_code()
+                
+                # Create a new class document
+                classes_collection.insert_one({'class_code': class_code, 'teacher_ids': [], 'student_ids': []})
+
+            elif teacher_action == 'join':
+                class_code = request.form.get('class_code')
+                class_doc = classes_collection.find_one({'class_code': class_code})
+                if not class_doc:
+                    flash('Invalid or non-existent class code. Please try again.', 'error')
+                    return redirect(url_for('signup'))
         
         elif user_type == 'student':
-            # Students must provide an existing class code
             class_code = request.form.get('class_code')
-            if not users_collection.find_one({'class_code': class_code, 'user_type': 'teacher'}):
+            class_doc = classes_collection.find_one({'class_code': class_code})
+            if not class_doc:
                 flash('Invalid or non-existent class code. Please try again.', 'error')
                 return redirect(url_for('signup'))
 
         # Hash the password for security
         hashed_password = generate_password_hash(password)
-
-        # Save the new user to the database, including the user_type and class_code
-        users_collection.insert_one({
+        
+        # Save the new user to the database
+        user_id = users_collection.insert_one({
             'username': username,
             'email': email,
             'password': hashed_password,
             'user_type': user_type,
             'class_code': class_code
-        })
+        }).inserted_id
+
+        # Update the class document with the new user's ID
+        if user_type == 'teacher':
+            classes_collection.update_one({'class_code': class_code}, {'$push': {'teacher_ids': str(user_id)}})
+        elif user_type == 'student':
+            classes_collection.update_one({'class_code': class_code}, {'$push': {'student_ids': str(user_id)}})
 
         flash('Your account has been created successfully! Please log in.', 'success')
         return redirect(url_for('login'))
@@ -101,24 +117,22 @@ def signup():
 def login():
     """Handles user login."""
     if request.method == 'POST':
-        # if not users_collection:
-        #     flash('Database connection error.', 'error')
-        #     return redirect(url_for('login'))
+        # FIX: Changed the truthiness check to an explicit comparison with None.
+        if users_collection is None:
+            flash('Database connection error.', 'error')
+            return redirect(url_for('login'))
 
         email = request.form.get('email')
         password = request.form.get('password')
 
-        # Find the user by email
         user = users_collection.find_one({'email': email})
 
-        # Check if user exists and password is correct
         if user and check_password_hash(user['password'], password):
-            # Store user info and their type in the session
             session['logged_in'] = True
             session['username'] = user['username']
             session['email'] = user['email']
             session['user_type'] = user['user_type']
-            session['class_code'] = user['class_code'] # Store the class code
+            session['class_code'] = user['class_code']
             flash('Logged in successfully!', 'success')
             return redirect(url_for('dashboard'))
         else:
@@ -136,14 +150,28 @@ def dashboard():
     
     username = session.get('username')
     user_type = session.get('user_type')
-    class_code = session.get('class_code') # Get the class code from the session
+    class_code = session.get('class_code')
     
+    # Fetch all class details
+    class_doc = classes_collection.find_one({'class_code': class_code})
+
+    if not class_doc:
+        flash('Class not found. Please contact support.', 'error')
+        return redirect(url_for('logout'))
+
+    # Get a list of student and teacher user IDs
+    teacher_ids = class_doc.get('teacher_ids', [])
+    student_ids = class_doc.get('student_ids', [])
+
+    # Fetch user details for display
+    teachers = list(users_collection.find({'_id': {'$in': [ObjectId(uid) for uid in teacher_ids]}}))
+    students = list(users_collection.find({'_id': {'$in': [ObjectId(uid) for uid in student_ids]}}))
+
     if user_type == 'teacher':
-        return render_template("teacher_dashboard.html", title="Teacher Dashboard", username=username, class_code=class_code)
+        return render_template("teacher_dashboard.html", title="Teacher Dashboard", username=username, class_code=class_code, students=students, teachers=teachers)
     elif user_type == 'student':
-        return render_template("student_dashboard.html", title="Student Dashboard", username=username, class_code=class_code)
+        return render_template("student_dashboard.html", title="Student Dashboard", username=username, class_code=class_code, students=students, teachers=teachers)
     else:
-        # Fallback for unexpected user types
         flash('Unexpected user type.', 'error')
         return redirect(url_for('logout'))
 
@@ -154,11 +182,10 @@ def logout():
     session.pop('username', None)
     session.pop('email', None)
     session.pop('user_type', None)
-    session.pop('class_code', None) # Clear the class code from the session
+    session.pop('class_code', None)
     flash('You have been logged out.', 'success')
     return redirect(url_for('home'))
 
 # --- Run the App ---
 if __name__ == '__main__':
-    # You can change host and port as needed
     app.run(host='0.0.0.0', port=5000, debug=True)

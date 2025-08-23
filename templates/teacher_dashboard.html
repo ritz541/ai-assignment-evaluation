@@ -11,6 +11,27 @@
 <h1>Teacher Dashboard</h1>
 <p>Welcome, {{ username }}! This is your special dashboard for teachers.</p>
 <p>Your class code is: <strong>{{ class_code }}</strong>. Share this with your students to have them join your class!</p>
+
+<div class="class-lists">
+    <div class="list-container">
+        <h2>Teachers in your class</h2>
+        <ul>
+            {% for teacher in teachers %}
+            <li>{{ teacher.username }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <div class="list-container">
+        <h2>Students in your class</h2>
+        <ul>
+            {% for student in students %}
+            <li>{{ student.username }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
 <div class="links">
     <a href="{{ url_for('logout') }}">Log Out</a>
 </div>

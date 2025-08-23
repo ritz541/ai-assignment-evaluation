@@ -1,11 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Singup</title>
-</head>
-<body>
 {% extends "base.html" %}
 {% block content %}
 <h1>Sign Up</h1>
@@ -23,7 +15,29 @@
             Teacher
         </label>
     </p>
-    <input type="text" id="class_code_input" name="class_code" placeholder="Enter Class Code" required>
+
+    <!-- Student-specific field -->
+    <div id="student_fields" style="display: block;">
+        <input type="text" id="student_class_code" name="class_code" placeholder="Enter Class Code" required>
+    </div>
+
+    <!-- Teacher-specific fields -->
+    <div id="teacher_fields" style="display: none;">
+        <p>
+            <label>
+                <input type="radio" name="teacher_action" value="create" checked>
+                Create a new class
+            </label>
+            <label>
+                <input type="radio" name="teacher_action" value="join">
+                Join an existing class
+            </label>
+        </p>
+        <div id="teacher_join_class" style="display: none;">
+            <input type="text" id="teacher_class_code" name="class_code" placeholder="Enter Class Code" required>
+        </div>
+    </div>
+
     <button type="submit">Register</button>
 </form>
 <div class="links">
@@ -31,30 +45,40 @@
 </div>
 
 <script>
-    // Get the radio buttons and the class code input field
-    const studentRadio = document.querySelector('input[name="user_type"][value="student"]');
-    const teacherRadio = document.querySelector('input[name="user_type"][value="teacher"]');
-    const classCodeInput = document.getElementById('class_code_input');
+    const userTypeRadios = document.querySelectorAll('input[name="user_type"]');
+    const teacherActionRadios = document.querySelectorAll('input[name="teacher_action"]');
+    const studentFields = document.getElementById('student_fields');
+    const teacherFields = document.getElementById('teacher_fields');
+    const studentClassCodeInput = document.getElementById('student_class_code');
+    const teacherJoinClassDiv = document.getElementById('teacher_join_class');
+    const teacherClassCodeInput = document.getElementById('teacher_class_code');
 
-    // Function to toggle the visibility and required status of the class code input
-    function toggleClassCodeInput() {
-        if (studentRadio.checked) {
-            classCodeInput.style.display = 'block';
-            classCodeInput.required = true;
+    function toggleFields() {
+        if (document.querySelector('input[name="user_type"][value="student"]').checked) {
+            studentFields.style.display = 'block';
+            teacherFields.style.display = 'none';
+            studentClassCodeInput.required = true;
+            teacherClassCodeInput.required = false;
         } else {
-            classCodeInput.style.display = 'none';
-            classCodeInput.required = false;
+            studentFields.style.display = 'none';
+            teacherFields.style.display = 'block';
+            studentClassCodeInput.required = false;
+            
+            // Check teacher action
+            if (document.querySelector('input[name="teacher_action"][value="join"]').checked) {
+                teacherJoinClassDiv.style.display = 'block';
+                teacherClassCodeInput.required = true;
+            } else {
+                teacherJoinClassDiv.style.display = 'none';
+                teacherClassCodeInput.required = false;
+            }
         }
     }
 
-    // Set the initial state on page load
-    toggleClassCodeInput();
-
-    // Add event listeners to the radio buttons
-    studentRadio.addEventListener('change', toggleClassCodeInput);
-    teacherRadio.addEventListener('change', toggleClassCodeInput);
+    userTypeRadios.forEach(radio => radio.addEventListener('change', toggleFields));
+    teacherActionRadios.forEach(radio => radio.addEventListener('change', toggleFields));
+    
+    // Set initial state
+    toggleFields();
 </script>
 {% endblock %}
-
-</body>
-</html>
