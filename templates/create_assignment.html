@@ -1,31 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow-lg p-4">
-            <h1 class="card-title text-center mb-4">Create New Assignment</h1>
-            <form method="POST" action="{{ url_for('create_assignment') }}" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label for="title" class="form-label">Title</label>
-                    <input type="text" id="title" name="title" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea id="description" name="description" rows="5" class="form-control" required></textarea>
-                </div>
-                <div class="mb-3">
-                    <label for="due_date" class="form-label">Due Date</label>
-                    <input type="date" id="due_date" name="due_date" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="file" class="form-label">Assignment File (PDF or Word)</label>
-                    <input type="file" id="file" name="file" class="form-control" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Create Assignment</button>
-            </form>
-            <div class="text-center mt-3">
-                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+<div class="flex justify-center">
+    <div class="bg-green-100 p-8 rounded-2xl shadow-xl max-w-xl w-full">
+        <h1 class="text-3xl font-bold text-center text-green-700 mb-6">Create New Assignment 📝</h1>
+        <form method="POST" action="{{ url_for('create_assignment') }}" enctype="multipart/form-data" class="space-y-4">
+            <div>
+                <label for="title" class="block text-sm font-medium text-green-700 mb-1">Title</label>
+                <input type="text" id="title" name="title" class="w-full p-3 rounded-xl border-2 border-green-300 focus:outline-none focus:ring-2 focus:ring-green-400" required>
             </div>
+            <div>
+                <label for="description" class="block text-sm font-medium text-green-700 mb-1">Description</label>
+                <textarea id="description" name="description" rows="5" class="w-full p-3 rounded-xl border-2 border-green-300 focus:outline-none focus:ring-2 focus:ring-green-400" required></textarea>
+            </div>
+            <div>
+                <label for="due_date" class="block text-sm font-medium text-green-700 mb-1">Due Date</label>
+                <input type="date" id="due_date" name="due_date" class="w-full p-3 rounded-xl border-2 border-green-300 focus:outline-none focus:ring-2 focus:ring-green-400" required>
+            </div>
+            <div>
+                <label for="file" class="block text-sm font-medium text-green-700 mb-1">Assignment File (PDF or Word)</label>
+                <input type="file" id="file" name="file" class="w-full p-3 rounded-xl border-2 border-green-300 focus:outline-none focus:ring-2 focus:ring-green-400" required>
+            </div>
+            <button type="submit" class="w-full bg-green-500 text-white p-3 rounded-xl font-bold text-lg hover:bg-green-600 transition-colors">Create Assignment</button>
+        </form>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('dashboard') }}" class="text-green-600 hover:underline">Back to Dashboard</a>
         </div>
     </div>
 </div>

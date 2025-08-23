@@ -1,54 +1,49 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="card shadow-lg p-4">
-            <header class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h1 class="display-5 fw-bold">Student Dashboard</h1>
-                    <p class="lead mb-0">Welcome, {{ current_user.username }}!</p>
-                </div>
-                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Log Out</a>
-            </header>
-            <div class="d-flex justify-content-center mb-4">
-                <span class="badge bg-primary fs-5 me-2">Class: {{ current_user.class_name }}</span>
-            </div>
-            <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="assignments-tab" data-bs-toggle="tab" data-bs-target="#assignments-pane" type="button" role="tab" aria-controls="assignments-pane" aria-selected="true">Assignments</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="teachers-tab" data-bs-toggle="tab" data-bs-target="#teachers-pane" type="button" role="tab" aria-controls="teachers-pane" aria-selected="false">Teachers</button>
-                </li>
-            </ul>
-            <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="assignments-pane" role="tabpanel" aria-labelledby="assignments-tab">
-                    <h2>Assignments</h2>
-                    <div class="list-group">
-                        {% for assignment in assignments %}
-                        <a href="{{ url_for('assignment_detail', assignment_id=assignment.id) }}" class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1">{{ assignment.title }}</h5>
-                                <small class="text-muted">Due: {{ assignment.due_date }}</small>
-                            </div>
-                            <p class="mb-1">{{ assignment.description }}</p>
-                            <small class="text-info fw-bold">{{ assignment.subject }}</small>
-                        </a>
-                        {% else %}
-                        <div class="alert alert-info text-center" role="alert">
-                            No assignments have been assigned yet.
-                        </div>
-                        {% endfor %}
+<div class="bg-gray-100 p-8 rounded-3xl shadow-2xl max-w-7xl mx-auto w-full">
+    <header class="flex flex-col sm:flex-row justify-between items-center pb-6 mb-6 border-b-2 border-gray-300">
+        <div>
+            <h1 class="text-4xl font-extrabold text-gray-800">Student Dashboard</h1>
+            <p class="text-xl text-gray-600">Welcome, {{ current_user.username }}! ✨</p>
+        </div>
+        <a href="{{ url_for('logout') }}" class="mt-4 sm:mt-0 px-6 py-3 bg-red-500 text-white rounded-xl font-bold text-lg hover:bg-red-600 transition-colors">Log Out</a>
+    </header>
+    
+    <div class="flex justify-center mb-8">
+        <span class="bg-blue-500 text-white text-lg font-semibold px-4 py-2 rounded-full shadow-lg">Class: {{ current_user.class_name }}</span>
+    </div>
+
+    <div class="space-y-8">
+        <div class="bg-white p-6 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Assignments</h2>
+            <div class="space-y-4">
+                {% for assignment in assignments %}
+                <a href="{{ url_for('assignment_detail', assignment_id=assignment.id) }}" class="block bg-yellow-50 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                    <div class="flex justify-between items-center mb-1">
+                        <h3 class="text-xl font-semibold text-yellow-700">{{ assignment.title }}</h3>
+                        <span class="text-sm font-bold text-red-500">Due: {{ assignment.due_date }}</span>
                     </div>
+                    <p class="text-gray-600">{{ assignment.description }}</p>
+                    <div class="mt-2 text-sm font-semibold text-gray-500">
+                        <span class="text-blue-500">Subject: {{ assignment.subject }}</span>
+                    </div>
+                </a>
+                {% else %}
+                <div class="text-center p-8 text-gray-500">
+                    <p>No assignments have been assigned yet. Time to relax! 😌</p>
                 </div>
-                <div class="tab-pane fade" id="teachers-pane" role="tabpanel" aria-labelledby="teachers-tab">
-                    <h2>Teachers in your class</h2>
-                    <ul class="list-group">
-                        {% for teacher in teachers %}
-                        <li class="list-group-item">{{ teacher.username }} - ({{ teacher.subject }})</li>
-                        {% endfor %}
-                    </ul>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Teachers in your class</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for teacher in teachers %}
+                <div class="bg-purple-50 p-4 rounded-xl shadow-md">
+                    <p class="text-lg font-medium text-purple-700">{{ teacher.username }} - <span class="text-purple-500">{{ teacher.subject }}</span></p>
                 </div>
+                {% endfor %}
             </div>
         </div>
     </div>

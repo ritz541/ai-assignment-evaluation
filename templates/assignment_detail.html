@@ -1,51 +1,60 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow-lg p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm">&larr; Back</a>
-                <h1 class="card-title text-center m-0">{{ assignment.title }}</h1>
-                <small class="text-muted">Due: {{ assignment.due_date }}</small>
+<div class="flex justify-center">
+    <div class="bg-white p-8 rounded-3xl shadow-xl max-w-3xl w-full">
+        <div class="flex items-center mb-6">
+            <a href="{{ url_for('dashboard') }}" class="text-gray-500 hover:text-gray-700 transition-colors mr-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+            </a>
+            <div class="flex-grow text-center">
+                <h1 class="text-4xl font-extrabold text-gray-800">{{ assignment.title }}</h1>
             </div>
-            <hr>
-            <div class="card-body">
-                <p class="card-text">{{ assignment.description }}</p>
-                {% if assignment.file_path %}
-                <div class="text-center my-4">
-                    <a href="{{ url_for('download_assignment', assignment_id=assignment.id) }}" class="btn btn-success btn-lg">Download Assignment</a>
-                </div>
-                {% endif %}
-            </div>
-            {% if user_type == 'student' %}
-            <div class="card-footer bg-light mt-4">
-                <h4 class="card-subtitle mb-3 text-center">Your Submission</h4>
-                {% if submission %}
-                    <div class="alert alert-success text-center">
-                        <p class="mb-1">You have successfully submitted this assignment.</p>
-                        <p class="mb-0">File: <strong>{{ submission.filename }}</strong> (Uploaded on: {{ submission.upload_date }})</p>
-                    </div>
-                {% else %}
-                    <div class="alert alert-info text-center">
-                        You have not submitted this assignment yet.
-                    </div>
-                {% endif %}
-                <form method="POST" action="{{ url_for('upload_submission', assignment_id=assignment.id) }}" enctype="multipart/form-data" class="mt-3">
-                    <div class="mb-3">
-                        <label for="submission-file" class="form-label">Upload your answers (PDF or Word file)</label>
-                        <input type="file" id="submission-file" name="file" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">
-                        {% if submission %}
-                            Update Submission
-                        {% else %}
-                            Submit Assignment
-                        {% endif %}
-                    </button>
-                </form>
+        </div>
+        <div class="text-center mb-6">
+            <span class="text-sm font-bold text-red-500">Due: {{ assignment.due_date }}</span>
+        </div>
+        <hr class="border-gray-300 mb-6">
+        
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Assignment Details</h2>
+            <p class="text-gray-600">{{ assignment.description }}</p>
+            {% if assignment.file_path %}
+            <div class="text-center mt-6">
+                <a href="{{ url_for('download_assignment', assignment_id=assignment.id) }}" class="bg-green-500 text-white p-3 rounded-xl font-bold text-lg hover:bg-green-600 transition-colors inline-block">Download Questions</a>
             </div>
             {% endif %}
         </div>
+        
+        {% if user_type == 'student' %}
+        <div class="bg-gray-50 p-6 rounded-2xl">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Submission</h2>
+            {% if submission %}
+            <div class="bg-green-100 text-green-800 p-4 rounded-xl text-center mb-4">
+                <p class="font-bold">You have successfully submitted this assignment. 🎉</p>
+                <p class="text-sm mt-1">File: <span class="font-semibold">{{ submission.filename }}</span> (Uploaded on: {{ submission.upload_date }})</p>
+            </div>
+            {% else %}
+            <div class="bg-yellow-100 text-yellow-800 p-4 rounded-xl text-center mb-4">
+                <p class="font-bold">You have not submitted this assignment yet. 🕰️</p>
+            </div>
+            {% endif %}
+            <form method="POST" action="{{ url_for('upload_submission', assignment_id=assignment.id) }}" enctype="multipart/form-data" class="space-y-4">
+                <div>
+                    <label for="submission-file" class="block text-sm font-medium text-gray-700 mb-1">Upload your answers (PDF or Word file)</label>
+                    <input type="file" id="submission-file" name="file" class="w-full p-3 rounded-xl border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-500 text-white p-3 rounded-xl font-bold text-lg hover:bg-blue-600 transition-colors">
+                    {% if submission %}
+                        Update Submission
+                    {% else %}
+                        Submit Assignment
+                    {% endif %}
+                </button>
+            </form>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

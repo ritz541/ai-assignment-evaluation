@@ -1,90 +1,50 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="card shadow-lg p-4">
-            <header class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h1 class="display-5 fw-bold">Teacher Dashboard</h1>
-                    <p class="lead mb-0">Welcome, {{ current_user.username }}!</p>
-                </div>
-                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Log Out</a>
-            </header>
-            <div class="d-flex justify-content-center mb-4">
-                <span class="badge bg-primary fs-5 me-2">Class: {{ current_user.class_name }}</span>
-                <span class="badge bg-secondary fs-5">Subject: {{ current_user.subject }}</span>
+<div class="bg-gray-100 p-8 rounded-3xl shadow-2xl max-w-7xl mx-auto w-full">
+    <header class="flex flex-col sm:flex-row justify-between items-center pb-6 mb-6 border-b-2 border-gray-300">
+        <div>
+            <h1 class="text-4xl font-extrabold text-gray-800">Teacher Dashboard</h1>
+            <p class="text-xl text-gray-600">Welcome, {{ current_user.username }}! ✨</p>
+        </div>
+        <a href="{{ url_for('logout') }}" class="mt-4 sm:mt-0 px-6 py-3 bg-red-500 text-white rounded-xl font-bold text-lg hover:bg-red-600 transition-colors">Log Out</a>
+    </header>
+    
+    <div class="flex flex-wrap justify-center sm:justify-start items-center space-x-2 mb-8">
+        <span class="bg-blue-500 text-white text-lg font-semibold px-4 py-2 rounded-full shadow-lg">Class: {{ current_user.class_name }}</span>
+        <span class="bg-purple-500 text-white text-lg font-semibold px-4 py-2 rounded-full shadow-lg">Subject: {{ current_user.subject }}</span>
+    </div>
+
+    <div class="space-y-8">
+        <div class="bg-white p-6 rounded-2xl shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-3xl font-bold text-gray-800">Assignments</h2>
+                <a href="{{ url_for('create_assignment') }}" class="px-6 py-3 bg-green-500 text-white rounded-xl font-bold text-lg hover:bg-green-600 transition-colors">Create New Assignment</a>
             </div>
-            <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="assignments-tab" data-bs-toggle="tab" data-bs-target="#assignments-pane" type="button" role="tab" aria-controls="assignments-pane" aria-selected="true">Assignments</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="submissions-tab" data-bs-toggle="tab" data-bs-target="#submissions-pane" type="button" role="tab" aria-controls="submissions-pane" aria-selected="false">Submissions</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="class-tab" data-bs-toggle="tab" data-bs-target="#class-pane" type="button" role="tab" aria-controls="class-pane" aria-selected="false">Class</button>
-                </li>
-            </ul>
-            <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="assignments-pane" role="tabpanel" aria-labelledby="assignments-tab">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2>Assignments</h2>
-                        <a href="{{ url_for('create_assignment') }}" class="btn btn-primary">Create New Assignment</a>
+            <div class="space-y-4">
+                {% for assignment in assignments %}
+                <a href="{{ url_for('assignment_detail', assignment_id=assignment.id) }}" class="block bg-green-50 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                    <div class="flex justify-between items-center mb-1">
+                        <h3 class="text-xl font-semibold text-green-700">{{ assignment.title }}</h3>
+                        <span class="text-sm font-bold text-red-500">Due: {{ assignment.due_date }}</span>
                     </div>
-                    <div class="list-group">
-                        {% for assignment in assignments %}
-                        <a href="{{ url_for('assignment_detail', assignment_id=assignment.id) }}" class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1">{{ assignment.title }}</h5>
-                                <small class="text-muted">Due: {{ assignment.due_date }}</small>
-                            </div>
-                            <p class="mb-1">{{ assignment.description }}</p>
-                        </a>
-                        {% else %}
-                        <div class="alert alert-info text-center" role="alert">
-                            No assignments have been created yet.
-                        </div>
-                        {% endfor %}
-                    </div>
+                    <p class="text-gray-600">{{ assignment.description }}</p>
+                </a>
+                {% else %}
+                <div class="text-center p-8 text-gray-500">
+                    <p>No assignments have been created yet. Let's make some! 🎨</p>
                 </div>
-                <div class="tab-pane fade" id="submissions-pane" role="tabpanel" aria-labelledby="submissions-tab">
-                    <h2>Submissions</h2>
-                    <div class="list-group">
-                        {% for submission in submissions %}
-                        <a href="{{ url_for('download_submission', submission_id=submission.id) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="mb-1">{{ submission.filename }}</h5>
-                                <small class="text-muted">Student: {{ submission.student_id }} | Uploaded on: {{ submission.upload_date }}</small>
-                            </div>
-                            <span class="badge bg-success">Download</span>
-                        </a>
-                        {% else %}
-                        <div class="alert alert-info text-center" role="alert">
-                            No submissions have been received yet.
-                        </div>
-                        {% endfor %}
-                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Students in your class</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for student in students %}
+                <div class="bg-purple-50 p-4 rounded-xl shadow-md">
+                    <p class="text-lg font-medium text-purple-700">{{ student.username }}</p>
                 </div>
-                <div class="tab-pane fade" id="class-pane" role="tabpanel" aria-labelledby="class-tab">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <h2>Teachers in your class</h2>
-                            <ul class="list-group">
-                                {% for teacher in teachers %}
-                                <li class="list-group-item">{{ teacher.username }} - ({{ teacher.subject }})</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <h2>Students in your class</h2>
-                            <ul class="list-group">
-                                {% for student in students %}
-                                <li class="list-group-item">{{ student.username }}</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
