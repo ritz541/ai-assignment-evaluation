@@ -24,13 +24,15 @@ try:
     client = MongoClient(MONGO_URI)
     db = client[DB_NAME]
     users_collection = db['users']
-    classes_collection = db['classes'] # New collection for classes
+    classes_collection = db['classes']
+    assignments_collection = db['assignments'] # New collection for assignments
     print("Successfully connected to MongoDB.")
 except Exception as e:
     print(f"Error connecting to MongoDB: {e}")
     client = None
     users_collection = None
     classes_collection = None
+    assignments_collection = None
 
 # --- Helper Function ---
 def generate_class_code():
@@ -49,7 +51,6 @@ def home():
 def signup():
     """Handles user registration."""
     if request.method == 'POST':
-        # FIX: Changed the truthiness check to an explicit comparison with None.
         if users_collection is None or classes_collection is None:
             flash('Database connection error.', 'error')
             return redirect(url_for('signup'))
@@ -69,11 +70,9 @@ def signup():
             teacher_action = request.form.get('teacher_action')
             if teacher_action == 'create':
                 class_code = generate_class_code()
-                # Check for a unique class code in a rare case of collision
                 while classes_collection.find_one({'class_code': class_code}):
                     class_code = generate_class_code()
                 
-                # Create a new class document
                 classes_collection.insert_one({'class_code': class_code, 'teacher_ids': [], 'student_ids': []})
 
             elif teacher_action == 'join':
@@ -90,10 +89,8 @@ def signup():
                 flash('Invalid or non-existent class code. Please try again.', 'error')
                 return redirect(url_for('signup'))
 
-        # Hash the password for security
         hashed_password = generate_password_hash(password)
         
-        # Save the new user to the database
         user_id = users_collection.insert_one({
             'username': username,
             'email': email,
@@ -102,7 +99,6 @@ def signup():
             'class_code': class_code
         }).inserted_id
 
-        # Update the class document with the new user's ID
         if user_type == 'teacher':
             classes_collection.update_one({'class_code': class_code}, {'$push': {'teacher_ids': str(user_id)}})
         elif user_type == 'student':
@@ -117,7 +113,6 @@ def signup():
 def login():
     """Handles user login."""
     if request.method == 'POST':
-        # FIX: Changed the truthiness check to an explicit comparison with None.
         if users_collection is None:
             flash('Database connection error.', 'error')
             return redirect(url_for('login'))
@@ -152,28 +147,62 @@ def dashboard():
     user_type = session.get('user_type')
     class_code = session.get('class_code')
     
-    # Fetch all class details
+    if classes_collection is None or assignments_collection is None:
+        flash('Database connection error.', 'error')
+        return redirect(url_for('logout'))
+
     class_doc = classes_collection.find_one({'class_code': class_code})
 
     if not class_doc:
         flash('Class not found. Please contact support.', 'error')
         return redirect(url_for('logout'))
 
-    # Get a list of student and teacher user IDs
     teacher_ids = class_doc.get('teacher_ids', [])
     student_ids = class_doc.get('student_ids', [])
 
-    # Fetch user details for display
     teachers = list(users_collection.find({'_id': {'$in': [ObjectId(uid) for uid in teacher_ids]}}))
     students = list(users_collection.find({'_id': {'$in': [ObjectId(uid) for uid in student_ids]}}))
+    
+    # Fetch all assignments for the user's class
+    assignments = list(assignments_collection.find({'class_code': class_code}).sort('due_date'))
 
     if user_type == 'teacher':
-        return render_template("teacher_dashboard.html", title="Teacher Dashboard", username=username, class_code=class_code, students=students, teachers=teachers)
+        return render_template("teacher_dashboard.html", title="Teacher Dashboard", username=username, class_code=class_code, students=students, teachers=teachers, assignments=assignments)
     elif user_type == 'student':
-        return render_template("student_dashboard.html", title="Student Dashboard", username=username, class_code=class_code, students=students, teachers=teachers)
+        return render_template("student_dashboard.html", title="Student Dashboard", username=username, class_code=class_code, students=students, teachers=teachers, assignments=assignments)
     else:
         flash('Unexpected user type.', 'error')
         return redirect(url_for('logout'))
+
+@app.route('/create_assignment', methods=['GET', 'POST'])
+def create_assignment():
+    """Handles the creation of a new assignment."""
+    if not session.get('logged_in') or session.get('user_type') != 'teacher':
+        flash('Unauthorized access.', 'error')
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        if assignments_collection is None:
+            flash('Database connection error.', 'error')
+            return redirect(url_for('teacher_dashboard'))
+
+        title = request.form.get('title')
+        description = request.form.get('description')
+        due_date = request.form.get('due_date')
+
+        # Insert the new assignment into the database
+        assignments_collection.insert_one({
+            'title': title,
+            'description': description,
+            'due_date': due_date,
+            'class_code': session.get('class_code'),
+            'teacher_id': str(users_collection.find_one({'email': session.get('email')})['_id'])
+        })
+
+        flash('Assignment created successfully!', 'success')
+        return redirect(url_for('dashboard'))
+
+    return render_template('create_assignment.html', title="Create Assignment")
 
 @app.route('/logout')
 def logout():
