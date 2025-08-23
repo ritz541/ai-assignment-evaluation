@@ -1,0 +1,85 @@
+/* General body and container styling */
+body { 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    background-color: #f0f2f5; 
+    margin: 0; 
+    padding: 0; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    height: 100vh; 
+}
+.container { 
+    background: #fff; 
+    padding: 2rem; 
+    border-radius: 10px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    width: 100%; 
+    max-width: 400px; 
+    text-align: center; 
+}
+
+/* Headings */
+h1 { 
+    color: #333; 
+    margin-bottom: 1rem; 
+}
+
+/* Forms and inputs */
+form { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 1rem; 
+}
+input[type="text"], input[type="password"], input[type="email"] { 
+    padding: 0.75rem; 
+    border: 1px solid #ccc; 
+    border-radius: 5px; 
+    font-size: 1rem; 
+}
+button { 
+    background-color: #007bff; 
+    color: white; 
+    padding: 0.75rem; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    font-size: 1rem; 
+    font-weight: bold; 
+    transition: background-color 0.3s; 
+}
+button:hover { 
+    background-color: #0056b3; 
+}
+
+/* Flash messages */
+.message { 
+    padding: 0.75rem; 
+    border-radius: 5px; 
+    margin-bottom: 1rem; 
+}
+.message.success { 
+    background-color: #d4edda; 
+    color: #155724; 
+    border-color: #c3e6cb; 
+}
+.message.error { 
+    background-color: #f8d7da; 
+    color: #721c24; 
+    border-color: #f5c6cb; 
+}
+
+/* Links and navigation */
+.links { 
+    margin-top: 1rem; 
+    display: flex; 
+    justify-content: space-around; 
+}
+.links a { 
+    color: #007bff; 
+    text-decoration: none; 
+    font-weight: bold; 
+}
+.links a:hover { 
+    text-decoration: underline; 
+}
