@@ -1,55 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    {% extends "base.html" %}
+{% extends "base.html" %}
 {% block content %}
-<div class="detail-container">
-    <div class="header-section">
-        <a href="{{ url_for('dashboard') }}" class="back-link">&larr; Back to Dashboard</a>
-        <h1 class="page-title">{{ assignment.title }}</h1>
-        <p class="due-date">Due: {{ assignment.due_date }}</p>
-    </div>
-
-    <div class="assignment-section">
-        <h2>Assignment Details</h2>
-        <p class="description">{{ assignment.description }}</p>
-        <a href="{{ url_for('download_assignment', assignment_id=assignment._id) }}" class="download-btn">Download Questions</a>
-    </div>
-
-    <div class="submission-section">
-        <h2>Your Submission</h2>
-        {% if submission %}
-            <div class="submission-status">
-                <p class="status-message success">You have successfully submitted this assignment.</p>
-                <p><strong>File:</strong> {{ submission.filename }}</p>
-                <p><strong>Uploaded on:</strong> {{ submission.upload_date }}</p>
-                <p class="note">You can upload a new file to replace your previous submission.</p>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm">&larr; Back</a>
+                <h1 class="card-title text-center m-0">{{ assignment.title }}</h1>
+                <small class="text-muted">Due: {{ assignment.due_date }}</small>
             </div>
-        {% else %}
-            <div class="submission-status">
-                <p class="status-message">You have not submitted this assignment yet.</p>
-            </div>
-        {% endif %}
-
-        <form method="POST" action="{{ url_for('upload_submission', assignment_id=assignment._id) }}" enctype="multipart/form-data">
-            <label for="submission-file">Upload your answers (PDF or Word file)</label>
-            <input type="file" id="submission-file" name="file" required>
-            <button type="submit" class="upload-btn">
-                {% if submission %}
-                    Update Submission
-                {% else %}
-                    Submit Assignment
+            <hr>
+            <div class="card-body">
+                <p class="card-text">{{ assignment.description }}</p>
+                {% if assignment.file_path %}
+                <div class="text-center my-4">
+                    <a href="{{ url_for('download_assignment', assignment_id=assignment.id) }}" class="btn btn-success btn-lg">Download Assignment</a>
+                </div>
                 {% endif %}
-            </button>
-        </form>
+            </div>
+            {% if user_type == 'student' %}
+            <div class="card-footer bg-light mt-4">
+                <h4 class="card-subtitle mb-3 text-center">Your Submission</h4>
+                {% if submission %}
+                    <div class="alert alert-success text-center">
+                        <p class="mb-1">You have successfully submitted this assignment.</p>
+                        <p class="mb-0">File: <strong>{{ submission.filename }}</strong> (Uploaded on: {{ submission.upload_date }})</p>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info text-center">
+                        You have not submitted this assignment yet.
+                    </div>
+                {% endif %}
+                <form method="POST" action="{{ url_for('upload_submission', assignment_id=assignment.id) }}" enctype="multipart/form-data" class="mt-3">
+                    <div class="mb-3">
+                        <label for="submission-file" class="form-label">Upload your answers (PDF or Word file)</label>
+                        <input type="file" id="submission-file" name="file" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        {% if submission %}
+                            Update Submission
+                        {% else %}
+                            Submit Assignment
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}
-
-</body>
-</html>

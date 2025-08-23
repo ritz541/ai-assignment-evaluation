@@ -1,84 +1,96 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Sign Up</h1>
-<form method="POST" action="{{ url_for('signup') }}">
-    <input type="text" name="username" placeholder="Username" required>
-    <input type="email" name="email" placeholder="Email" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <p>
-        <label>
-            <input type="radio" name="user_type" value="student" checked>
-            Student
-        </label>
-        <label>
-            <input type="radio" name="user_type" value="teacher">
-            Teacher
-        </label>
-    </p>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-lg p-4">
+            <h1 class="card-title text-center mb-4">Sign Up</h1>
+            <form method="POST" action="{{ url_for('signup') }}">
+                <div class="mb-3">
+                    <input type="text" name="username" class="form-control" placeholder="Username" required>
+                </div>
+                <div class="mb-3">
+                    <input type="email" name="email" class="form-control" placeholder="Email" required>
+                </div>
+                <div class="mb-3">
+                    <input type="password" name="password" class="form-control" placeholder="Password" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Are you a...?</label>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="user_type" id="studentRadio" value="student" checked>
+                            <label class="form-check-label" for="studentRadio">Student</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="user_type" id="teacherRadio" value="teacher">
+                            <label class="form-check-label" for="teacherRadio">Teacher</label>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- Student-specific field -->
-    <div id="student_fields" style="display: block;">
-        <input type="text" id="student_class_code" name="class_code" placeholder="Enter Class Code" required>
-    </div>
+                <!-- Student-specific field -->
+                <div id="student-fields" class="mb-3">
+                    <label class="form-label">Class</label>
+                    <select id="student-class-name" name="class_name" class="form-select" required>
+                        <option value="MCA - 1">MCA - 1</option>
+                        <option value="MCA - 2">MCA - 2</option>
+                    </select>
+                </div>
 
-    <!-- Teacher-specific fields -->
-    <div id="teacher_fields" style="display: none;">
-        <p>
-            <label>
-                <input type="radio" name="teacher_action" value="create" checked>
-                Create a new class
-            </label>
-            <label>
-                <input type="radio" name="teacher_action" value="join">
-                Join an existing class
-            </label>
-        </p>
-        <div id="teacher_join_class" style="display: none;">
-            <input type="text" id="teacher_class_code" name="class_code" placeholder="Enter Class Code" required>
+                <!-- Teacher-specific fields -->
+                <div id="teacher-fields" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label">Class</label>
+                        <select id="teacher-class-name" name="class_name" class="form-select" required>
+                            <option value="MCA - 1">MCA - 1</option>
+                            <option value="MCA - 2">MCA - 2</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Subject</label>
+                        <input type="text" id="teacher-subject-field" name="subject" class="form-control" placeholder="e.g., Data Structures, Web Development" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Register</button>
+            </form>
+            <div class="text-center mt-3">
+                <small class="text-muted">Already have an account? <a href="{{ url_for('login') }}">Log In</a></small>
+            </div>
         </div>
     </div>
-
-    <button type="submit">Register</button>
-</form>
-<div class="links">
-    <p>Already have an account? <a href="{{ url_for('login') }}">Log In</a></p>
 </div>
 
 <script>
-    const userTypeRadios = document.querySelectorAll('input[name="user_type"]');
-    const teacherActionRadios = document.querySelectorAll('input[name="teacher_action"]');
-    const studentFields = document.getElementById('student_fields');
-    const teacherFields = document.getElementById('teacher_fields');
-    const studentClassCodeInput = document.getElementById('student_class_code');
-    const teacherJoinClassDiv = document.getElementById('teacher_join_class');
-    const teacherClassCodeInput = document.getElementById('teacher_class_code');
-
-    function toggleFields() {
-        if (document.querySelector('input[name="user_type"][value="student"]').checked) {
-            studentFields.style.display = 'block';
-            teacherFields.style.display = 'none';
-            studentClassCodeInput.required = true;
-            teacherClassCodeInput.required = false;
-        } else {
-            studentFields.style.display = 'none';
-            teacherFields.style.display = 'block';
-            studentClassCodeInput.required = false;
-            
-            // Check teacher action
-            if (document.querySelector('input[name="teacher_action"][value="join"]').checked) {
-                teacherJoinClassDiv.style.display = 'block';
-                teacherClassCodeInput.required = true;
-            } else {
-                teacherJoinClassDiv.style.display = 'none';
-                teacherClassCodeInput.required = false;
+    document.addEventListener('DOMContentLoaded', function() {
+        const studentRadio = document.getElementById('studentRadio');
+        const teacherRadio = document.getElementById('teacherRadio');
+        const studentFields = document.getElementById('student-fields');
+        const teacherFields = document.getElementById('teacher-fields');
+        const studentClassNameSelect = document.getElementById('student-class-name');
+        const teacherSubjectField = document.getElementById('teacher-subject-field');
+        const teacherClassNameSelect = document.getElementById('teacher-class-name');
+        
+        function toggleFields() {
+            if (studentRadio.checked) {
+                studentFields.style.display = 'block';
+                teacherFields.style.display = 'none';
+                studentClassNameSelect.required = true;
+                teacherSubjectField.required = false;
+                teacherClassNameSelect.required = false;
+            } else if (teacherRadio.checked) {
+                studentFields.style.display = 'none';
+                teacherFields.style.display = 'block';
+                studentClassNameSelect.required = false;
+                teacherSubjectField.required = true;
+                teacherClassNameSelect.required = true;
             }
         }
-    }
 
-    userTypeRadios.forEach(radio => radio.addEventListener('change', toggleFields));
-    teacherActionRadios.forEach(radio => radio.addEventListener('change', toggleFields));
-    
-    // Set initial state
-    toggleFields();
+        const userRadios = document.querySelectorAll('input[name="user_type"]');
+        userRadios.forEach(radio => radio.addEventListener('change', toggleFields));
+        
+        toggleFields();
+    });
 </script>
 {% endblock %}

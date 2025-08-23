@@ -1,72 +1,56 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard</title>
-</head>
-<body>
 {% extends "base.html" %}
 {% block content %}
-<div class="dashboard-container">
-    <header class="dashboard-header">
-        <h1>Student Dashboard</h1>
-        <p>Welcome, {{ username }}!</p>
-        <a href="{{ url_for('logout') }}" class="logout-btn">Log Out</a>
-    </header>
-
-    <div class="tabs">
-        <button class="tab-button active" data-tab="assignments">Assignments</button>
-        <button class="tab-button" data-tab="teachers">Teachers</button>
-    </div>
-
-    <div id="assignments" class="tab-content active">
-        <div class="tab-header">
-            <h2>Assignments</h2>
-            <p>Class Code: <strong>{{ class_code }}</strong></p>
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-lg p-4">
+            <header class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-5 fw-bold">Student Dashboard</h1>
+                    <p class="lead mb-0">Welcome, {{ current_user.username }}!</p>
+                </div>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Log Out</a>
+            </header>
+            <div class="d-flex justify-content-center mb-4">
+                <span class="badge bg-primary fs-5 me-2">Class: {{ current_user.class_name }}</span>
+            </div>
+            <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="assignments-tab" data-bs-toggle="tab" data-bs-target="#assignments-pane" type="button" role="tab" aria-controls="assignments-pane" aria-selected="true">Assignments</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="teachers-tab" data-bs-toggle="tab" data-bs-target="#teachers-pane" type="button" role="tab" aria-controls="teachers-pane" aria-selected="false">Teachers</button>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="assignments-pane" role="tabpanel" aria-labelledby="assignments-tab">
+                    <h2>Assignments</h2>
+                    <div class="list-group">
+                        {% for assignment in assignments %}
+                        <a href="{{ url_for('assignment_detail', assignment_id=assignment.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ assignment.title }}</h5>
+                                <small class="text-muted">Due: {{ assignment.due_date }}</small>
+                            </div>
+                            <p class="mb-1">{{ assignment.description }}</p>
+                            <small class="text-info fw-bold">{{ assignment.subject }}</small>
+                        </a>
+                        {% else %}
+                        <div class="alert alert-info text-center" role="alert">
+                            No assignments have been assigned yet.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="teachers-pane" role="tabpanel" aria-labelledby="teachers-tab">
+                    <h2>Teachers in your class</h2>
+                    <ul class="list-group">
+                        {% for teacher in teachers %}
+                        <li class="list-group-item">{{ teacher.username }} - ({{ teacher.subject }})</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
         </div>
-        <div class="assignments-list">
-            {% if assignments %}
-                {% for assignment in assignments %}
-                    <a href="{{ url_for('assignment_detail', assignment_id=assignment._id) }}" class="assignment-card">
-                        <h3>{{ assignment.title }}</h3>
-                        <p>{{ assignment.description }}</p>
-                        <p class="due-date">Due: {{ assignment.due_date }}</p>
-                    </a>
-                {% endfor %}
-            {% else %}
-                <p class="no-content">No assignments have been assigned yet.</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <div id="teachers" class="tab-content">
-        <div class="tab-header">
-            <h2>Teachers in your class</h2>
-        </div>
-        <ul class="user-list">
-            {% for teacher in teachers %}
-            <li>{{ teacher.username }}</li>
-            {% endfor %}
-        </ul>
     </div>
 </div>
-
-<script>
-    const tabs = document.querySelectorAll('.tab-button');
-    const contents = document.querySelectorAll('.tab-content');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(item => item.classList.remove('active'));
-            contents.forEach(item => item.classList.remove('active'));
-
-            tab.classList.add('active');
-            document.getElementById(tab.dataset.tab).classList.add('active');
-        });
-    });
-</script>
 {% endblock %}
-
-</body>
-</html>
