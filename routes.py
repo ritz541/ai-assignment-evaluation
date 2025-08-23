@@ -86,26 +86,53 @@ def register_routes(app):
         user_type = current_user.user_type
         class_name = current_user.class_name
         
-        # Fetch users and assignments based on class_name
+        # Fetch user details for display
         teachers_docs = list(app.db.users.find({'user_type': 'teacher', 'class_name': class_name}))
         students_docs = list(app.db.users.find({'user_type': 'student', 'class_name': class_name}))
         
         teachers = [User(doc) for doc in teachers_docs]
         students = [User(doc) for doc in students_docs]
         
-        assignments_docs = list(app.db.assignments.find({'class_name': class_name}).sort('due_date'))
-        assignments = [Assignment(doc) for doc in assignments_docs]
-        
+        # FIX: The assignment query now filters by both class_name and the current teacher's ID
+        assignments_docs = []
         if user_type == 'teacher':
-            submissions_docs = list(app.db.submissions.find({'class_name': class_name}))
-            submissions = [Submission(doc) for doc in submissions_docs]
-            return render_template("teacher_dashboard.html", title="Teacher Dashboard", class_name=class_name, students=students, teachers=teachers, assignments=assignments, submissions=submissions)
+            assignments_docs = list(app.db.assignments.find({
+                'class_name': class_name,
+                'teacher_id': current_user.get_id()
+            }).sort('due_date'))
+        else: # For students
+            assignments_docs = list(app.db.assignments.find({
+                'class_name': class_name
+            }).sort('due_date'))
+            
+        assignments = [Assignment(doc) for doc in assignments_docs]
+
+        # For student dashboard, check for submissions to change assignment appearance
+        submitted_assignment_ids = []
+        if user_type == 'student':
+            student_id = current_user.get_id()
+            submitted_assignment_ids = [
+                str(s.get('assignment_id')) for s in app.db.submissions.find({'student_id': student_id}, {'assignment_id': 1})
+            ]
+        
+        # For teacher dashboard, get submission counts
+        assignment_stats = {}
+        if user_type == 'teacher':
+            total_students_in_class = len(students)
+            for assignment in assignments:
+                submitted_count = app.db.submissions.count_documents({
+                    'assignment_id': assignment.id
+                })
+                assignment_stats[assignment.id] = {
+                    'submitted': submitted_count,
+                    'pending': total_students_in_class - submitted_count
+                }
+
+        if user_type == 'teacher':
+            return render_template("teacher_dashboard.html", title="Teacher Dashboard", class_name=class_name, students=students, teachers=teachers, assignments=assignments, assignment_stats=assignment_stats)
         
         elif user_type == 'student':
-            student_id = current_user.get_id()
-            submissions_docs = list(app.db.submissions.find({'student_id': student_id}))
-            submissions = [Submission(doc) for doc in submissions_docs]
-            return render_template("student_dashboard.html", title="Student Dashboard", class_name=class_name, students=students, teachers=teachers, assignments=assignments, submissions=submissions)
+            return render_template("student_dashboard.html", title="Student Dashboard", class_name=class_name, students=students, teachers=teachers, assignments=assignments, submitted_assignment_ids=submitted_assignment_ids)
         
         else:
             flash('Unexpected user type.', 'danger')
@@ -204,6 +231,34 @@ def register_routes(app):
         filename = os.path.basename(assignment.file_path)
 
         return send_from_directory(directory, filename, as_attachment=True)
+
+    @app.route('/submissions/<assignment_id>')
+    @login_required
+    def view_submissions(assignment_id):
+        if current_user.user_type != 'teacher':
+            flash('Unauthorized access.', 'danger')
+            return redirect(url_for('dashboard'))
+
+        if app.db is None:
+            flash('Database connection error.', 'danger')
+            return redirect(url_for('dashboard'))
+
+        assignment = app.db.assignments.find_one({'_id': ObjectId(assignment_id)})
+        if not assignment or assignment.get('class_name') != current_user.class_name:
+            flash('Assignment not found or you do not have access.', 'danger')
+            return redirect(url_for('dashboard'))
+        
+        # Fetch submissions for this specific assignment
+        submissions_docs = list(app.db.submissions.find({'assignment_id': assignment_id}))
+        submissions = [Submission(doc) for doc in submissions_docs]
+
+        # Fetch student usernames for each submission
+        for submission in submissions:
+            student_doc = app.db.users.find_one({'_id': ObjectId(submission.student_id)})
+            submission.student_username = student_doc['username'] if student_doc else 'Unknown'
+
+        return render_template('submissions_list.html', title='Submissions', submissions=submissions, assignment_title=assignment['title'])
+
 
     @app.route('/download/submission/<submission_id>')
     @login_required

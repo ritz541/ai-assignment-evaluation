@@ -22,13 +22,21 @@
             </div>
             <div class="space-y-4">
                 {% for assignment in assignments %}
-                <a href="{{ url_for('assignment_detail', assignment_id=assignment.id) }}" class="block bg-green-50 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                    <div class="flex justify-between items-center mb-1">
-                        <h3 class="text-xl font-semibold text-green-700">{{ assignment.title }}</h3>
+                <div class="bg-blue-50 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-xl font-semibold text-blue-700">{{ assignment.title }}</h3>
                         <span class="text-sm font-bold text-red-500">Due: {{ assignment.due_date }}</span>
                     </div>
-                    <p class="text-gray-600">{{ assignment.description }}</p>
-                </a>
+                    <p class="text-gray-600 mb-4">{{ assignment.description }}</p>
+                    
+                    <div class="flex justify-between items-center text-sm font-semibold">
+                        <div class="flex space-x-4">
+                            <span class="text-gray-500">Submitted: <span class="text-green-600">{{ assignment_stats[assignment.id].submitted }}</span></span>
+                            <span class="text-gray-500">Pending: <span class="text-yellow-600">{{ assignment_stats[assignment.id].pending }}</span></span>
+                        </div>
+                        <a href="{{ url_for('view_submissions', assignment_id=assignment.id) }}" class="bg-purple-500 text-white text-sm px-4 py-2 rounded-lg font-bold hover:bg-purple-600 transition-colors">View Submissions</a>
+                    </div>
+                </div>
                 {% else %}
                 <div class="text-center p-8 text-gray-500">
                     <p>No assignments have been created yet. Let's make some! 🎨</p>

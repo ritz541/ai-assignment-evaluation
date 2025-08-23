@@ -18,10 +18,24 @@
             <h2 class="text-3xl font-bold text-gray-800 mb-4">Assignments</h2>
             <div class="space-y-4">
                 {% for assignment in assignments %}
-                <a href="{{ url_for('assignment_detail', assignment_id=assignment.id) }}" class="block bg-yellow-50 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                {% set submitted = assignment.id in submitted_assignment_ids %}
+                <a href="{{ url_for('assignment_detail', assignment_id=assignment.id) }}" 
+                   class="block p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow 
+                          {% if submitted %} bg-green-100 {% else %} bg-yellow-100 {% endif %}">
                     <div class="flex justify-between items-center mb-1">
-                        <h3 class="text-xl font-semibold text-yellow-700">{{ assignment.title }}</h3>
-                        <span class="text-sm font-bold text-red-500">Due: {{ assignment.due_date }}</span>
+                        <h3 class="text-xl font-semibold {% if submitted %} text-green-700 {% else %} text-yellow-700 {% endif %}">{{ assignment.title }}</h3>
+                        <div class="flex items-center space-x-2">
+                            {% if submitted %}
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {% else %}
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {% endif %}
+                            <span class="text-sm font-bold text-red-500">Due: {{ assignment.due_date }}</span>
+                        </div>
                     </div>
                     <p class="text-gray-600">{{ assignment.description }}</p>
                     <div class="mt-2 text-sm font-semibold text-gray-500">

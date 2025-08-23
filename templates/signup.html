@@ -27,26 +27,19 @@
                 </div>
             </div>
 
-            <!-- Student-specific fields -->
-            <div id="student-fields" class="space-y-4">
+            <!-- Class fields for both user types -->
+            <div id="class-fields" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-blue-700 mb-1">Class</label>
-                    <select id="student-class-name" name="class_name" class="w-full p-3 rounded-xl border-2 border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                    <select id="class-name-select" name="class_name" class="w-full p-3 rounded-xl border-2 border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
                         <option value="MCA - 1">MCA - 1</option>
                         <option value="MCA - 2">MCA - 2</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Teacher-specific fields -->
-            <div id="teacher-fields" class="space-y-4" style="display: none;">
-                <div>
-                    <label class="block text-sm font-medium text-blue-700 mb-1">Class</label>
-                    <select id="teacher-class-name" name="class_name" class="w-full p-3 rounded-xl border-2 border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                        <option value="MCA - 1">MCA - 1</option>
-                        <option value="MCA - 2">MCA - 2</option>
-                    </select>
-                </div>
+            <!-- Teacher-specific subject field -->
+            <div id="teacher-subject-field-container" class="space-y-4" style="display: none;">
                 <div>
                     <label class="block text-sm font-medium text-blue-700 mb-1">Subject</label>
                     <input type="text" id="teacher-subject-field" name="subject" class="w-full p-3 rounded-xl border-2 border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="e.g., Data Structures, Web Development" required>
@@ -65,25 +58,16 @@
     document.addEventListener('DOMContentLoaded', function() {
         const studentRadio = document.getElementById('studentRadio');
         const teacherRadio = document.getElementById('teacherRadio');
-        const studentFields = document.getElementById('student-fields');
-        const teacherFields = document.getElementById('teacher-fields');
-        const studentClassNameSelect = document.getElementById('student-class-name');
+        const teacherSubjectFieldContainer = document.getElementById('teacher-subject-field-container');
         const teacherSubjectField = document.getElementById('teacher-subject-field');
-        const teacherClassNameSelect = document.getElementById('teacher-class-name');
         
         function toggleFields() {
             if (studentRadio.checked) {
-                studentFields.classList.remove('hidden');
-                teacherFields.classList.add('hidden');
-                studentClassNameSelect.required = true;
+                teacherSubjectFieldContainer.style.display = 'none';
                 teacherSubjectField.required = false;
-                teacherClassNameSelect.required = false;
             } else if (teacherRadio.checked) {
-                studentFields.classList.add('hidden');
-                teacherFields.classList.remove('hidden');
-                studentClassNameSelect.required = false;
+                teacherSubjectFieldContainer.style.display = 'block';
                 teacherSubjectField.required = true;
-                teacherClassNameSelect.required = true;
             }
         }
 

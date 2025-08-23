@@ -33,6 +33,7 @@ class Submission:
         self.id = str(submission_data['_id'])
         self.assignment_id = submission_data.get('assignment_id')
         self.student_id = submission_data.get('student_id')
+        self.class_name = submission_data.get('class_name') # Added class_name to the Submission model
         self.filename = submission_data.get('filename')
         self.file_path = submission_data.get('file_path')
         self.upload_date = submission_data.get('upload_date')
