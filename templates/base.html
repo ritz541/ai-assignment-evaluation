@@ -5,42 +5,170 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                        'poppins': ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 2s infinite',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'wiggle': 'wiggle 1s ease-in-out infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'gradient': 'gradient 15s ease infinite',
+                    },
+                    keyframes: {
+                        wiggle: {
+                            '0%, 100%': { transform: 'rotate(-3deg)' },
+                            '50%': { transform: 'rotate(3deg)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        gradient: {
+                            '0%, 100%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                        },
+                    },
+                }
+            }
+        }
+    </script>
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #fce7f3;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(-45deg, #ff9a9e, #fecfef, #fecfef, #ffecd2);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
         }
+        
+        .message {
+            animation: slideInDown 0.5s ease-out;
+        }
+        
         .message.success {
-            background-color: #d1e7dd;
+            background: linear-gradient(135deg, #d1e7dd, #a3cfbb);
             color: #0f5132;
+            border-left: 4px solid #198754;
         }
         .message.danger {
-            background-color: #f8d7da;
+            background: linear-gradient(135deg, #f8d7da, #f1a1a8);
             color: #721c24;
+            border-left: 4px solid #dc3545;
         }
         .message.warning {
-            background-color: #fff3cd;
+            background: linear-gradient(135deg, #fff3cd, #fde68a);
             color: #664d03;
+            border-left: 4px solid #ffc107;
         }
         .message.info {
-            background-color: #cff4fc;
+            background: linear-gradient(135deg, #cff4fc, #93e6fb);
             color: #055160;
+            border-left: 4px solid #0dcaf0;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                transform: translate3d(-50%, -100%, 0);
+                opacity: 0;
+            }
+            to {
+                transform: translate3d(-50%, 0, 0);
+                opacity: 1;
+            }
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .btn-fun {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-fun:hover {
+            transform: scale(1.05);
+        }
+        
+        .btn-fun::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-fun:hover::before {
+            left: 100%;
+        }
+        
+        .emoji-float {
+            display: inline-block;
+            animation: float 2s ease-in-out infinite;
+        }
+        
+        .rainbow-text {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 400%;
+            animation: gradient 3s ease infinite;
         }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
+    <!-- Fun floating elements -->
+    <div class="fixed top-10 left-10 text-4xl emoji-float" style="animation-delay: 0s;">🎓</div>
+    <div class="fixed top-20 right-20 text-3xl emoji-float" style="animation-delay: 0.5s;">📚</div>
+    <div class="fixed bottom-20 left-20 text-3xl emoji-float" style="animation-delay: 1s;">✨</div>
+    <div class="fixed bottom-10 right-10 text-4xl emoji-float" style="animation-delay: 1.5s;">🚀</div>
+    
+    <!-- Flash Messages -->
     <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-            <div class="message {{ category }} p-3 rounded-lg shadow-md mb-2 text-center" role="alert">
-                {{ message }}
+            <div class="message {{ category }} p-4 rounded-xl shadow-lg mb-3 text-center font-semibold" role="alert">
+                <div class="flex items-center justify-center">
+                    {% if category == 'success' %}
+                        <span class="text-2xl mr-2">🎉</span>
+                    {% elif category == 'danger' %}
+                        <span class="text-2xl mr-2">❌</span>
+                    {% elif category == 'warning' %}
+                        <span class="text-2xl mr-2">⚠️</span>
+                    {% else %}
+                        <span class="text-2xl mr-2">ℹ️</span>
+                    {% endif %}
+                    {{ message }}
+                </div>
             </div>
             {% endfor %}
         {% endif %}
         {% endwith %}
     </div>
+    
     <main class="w-full">
         {% block content %}{% endblock %}
     </main>

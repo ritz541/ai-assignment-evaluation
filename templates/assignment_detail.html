@@ -1,68 +1,170 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="flex justify-center">
-    <div class="bg-white p-8 rounded-3xl shadow-xl max-w-3xl w-full">
-        <div class="flex items-center mb-6">
-            <a href="{{ url_for('dashboard') }}" class="text-gray-500 hover:text-gray-700 transition-colors mr-4">
+    <div class="glass-effect p-8 rounded-3xl shadow-2xl max-w-4xl w-full">
+        <div class="flex items-center mb-8">
+            <a href="{{ url_for('dashboard') }}" class="text-gray-600 hover:text-gray-800 transition-colors mr-4 p-2 rounded-full hover:bg-white hover:bg-opacity-50">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
             </a>
             <div class="flex-grow text-center">
-                <h1 class="text-4xl font-extrabold text-gray-800">{{ assignment.title }}</h1>
+                <h1 class="text-4xl font-extrabold rainbow-text mb-2">{{ assignment.title }}</h1>
+                <div class="flex justify-center space-x-2 text-2xl">
+                    <span class="emoji-float" style="animation-delay: 0s;">📚</span>
+                    <span class="emoji-float" style="animation-delay: 0.3s;">✨</span>
+                    <span class="emoji-float" style="animation-delay: 0.6s;">🎯</span>
+                </div>
             </div>
         </div>
-        <div class="text-center mb-6">
-            <span class="text-sm font-bold text-red-500">Due: {{ assignment.due_date }}</span>
+        
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-full font-bold text-lg shadow-lg">
+                <span class="text-2xl mr-2">🗓️</span>
+                Due: {{ assignment.due_date }}
+            </div>
         </div>
-        <hr class="border-gray-300 mb-6">
+        
+        <hr class="border-white border-opacity-30 mb-8">
         
         <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">Assignment Details</h2>
-            <p class="text-gray-600">{{ assignment.description }}</p>
-            {% if assignment.file_path %}
-            <div class="text-center mt-6">
-                <a href="{{ url_for('download_assignment', assignment_id=assignment.id) }}" class="bg-green-500 text-white p-3 rounded-xl font-bold text-lg hover:bg-green-600 transition-colors inline-block">Download Questions</a>
+            <div class="bg-white bg-opacity-90 p-8 rounded-2xl shadow-lg">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <span class="text-3xl mr-3">📖</span>Assignment Details
+                </h2>
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl mb-6">
+                    <p class="text-gray-700 text-lg leading-relaxed">{{ assignment.description }}</p>
+                </div>
+                
+                {% if assignment.file_path %}
+                <div class="text-center">
+                    <a href="{{ url_for('download_assignment', assignment_id=assignment.id) }}" 
+                       class="inline-block bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 btn-fun shadow-lg">
+                        <span class="mr-2">📥</span>Download Questions
+                    </a>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
         
         {% if user_type == 'student' %}
-        <div class="bg-gray-50 p-6 rounded-2xl">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Submission</h2>
+        <div class="bg-white bg-opacity-90 p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <span class="text-3xl mr-3">📝</span>Your Submission
+            </h2>
+            
             {% if submission %}
-            <div class="bg-green-100 text-green-800 p-4 rounded-xl text-center mb-4">
-                <p class="font-bold">You have successfully submitted this assignment. 🎉</p>
-                <p class="text-sm mt-1">File: <span class="font-semibold">{{ submission.filename }}</span> (Uploaded on: {{ submission.upload_date }})</p>
+            <div class="bg-gradient-to-r from-green-100 to-emerald-100 border-l-4 border-green-500 p-6 rounded-2xl mb-6">
+                <div class="flex items-center justify-center mb-4">
+                    <div class="text-6xl">
+                        <span class="emoji-float">🎉</span>
+                    </div>
+                </div>
+                <p class="font-bold text-green-800 text-center text-xl mb-2">
+                    Assignment Submitted Successfully!
+                </p>
+                <div class="text-center text-green-700">
+                    <p class="mb-2"><span class="font-semibold">File:</span> {{ submission.filename }}</p>
+                    <p><span class="font-semibold">Submitted on:</span> {{ submission.upload_date }}</p>
+                </div>
                 
                 {% if submission.ai_score %}
-                <div class="mt-4 border-t border-green-300 pt-4">
-                    <h3 class="text-xl font-bold">AI Evaluation</h3>
-                    <p class="text-lg mt-2">Score: <span class="font-extrabold">{{ submission.ai_score }} / 100</span></p>
-                    <p class="text-sm mt-1">Remarks: {{ submission.ai_remarks }}</p>
+                <div class="mt-6 pt-4 border-t border-green-300">
+                    <h3 class="text-2xl font-bold text-center mb-4 flex items-center justify-center">
+                        <span class="text-2xl mr-2">🤖</span>AI Evaluation Results
+                    </h3>
+                    <div class="bg-white p-6 rounded-xl">
+                        <div class="text-center mb-4">
+                            <div class="inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full">
+                                <span class="text-2xl font-extrabold">{{ submission.ai_score }} / 100</span>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <p class="text-gray-700"><span class="font-semibold">AI Feedback:</span> {{ submission.ai_remarks }}</p>
+                        </div>
+                    </div>
                 </div>
                 {% endif %}
             </div>
             {% else %}
-            <div class="bg-yellow-100 text-yellow-800 p-4 rounded-xl text-center mb-4">
-                <p class="font-bold">You have not submitted this assignment yet. 🕰️</p>
+            <div class="bg-gradient-to-r from-yellow-100 to-amber-100 border-l-4 border-yellow-500 p-6 rounded-2xl mb-6">
+                <div class="flex items-center justify-center mb-4">
+                    <div class="text-6xl animate-bounce">
+                        <span>⏰</span>
+                    </div>
+                </div>
+                <p class="font-bold text-yellow-800 text-center text-xl mb-2">
+                    Time to Submit Your Work!
+                </p>
+                <p class="text-yellow-700 text-center">Don't wait too long - the deadline is approaching! 🚀</p>
             </div>
             {% endif %}
-            <form method="POST" action="{{ url_for('upload_submission', assignment_id=assignment.id) }}" enctype="multipart/form-data" class="space-y-4">
-                <div>
-                    <label for="submission-file" class="block text-sm font-medium text-gray-700 mb-1">Upload your answers (PDF or Word file)</label>
-                    <input type="file" id="submission-file" name="file" class="w-full p-3 rounded-xl border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400" required>
+            
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-2xl">
+                <form method="POST" action="{{ url_for('upload_submission', assignment_id=assignment.id) }}" enctype="multipart/form-data" class="space-y-6">
+                    <div class="relative group">
+                        <label for="submission-file" class="block text-lg font-bold text-gray-700 mb-3 flex items-center">
+                            <span class="text-2xl mr-2">📎</span>Upload Your Answer File
+                        </label>
+                        <div class="relative">
+                            <input type="file" id="submission-file" name="file" 
+                                   class="w-full p-4 rounded-2xl border-2 border-dashed border-purple-300 bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-purple-100 transition-all duration-300 font-medium file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-500 file:text-white hover:file:bg-purple-600" 
+                                   accept=".pdf,.doc,.docx" required>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2 flex items-center">
+                            <span class="mr-1">💡</span>Accepted formats: PDF, Word (.doc, .docx)
+                        </p>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-2xl font-bold text-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 btn-fun shadow-lg">
+                        {% if submission %}
+                            <span class="mr-2">🔄</span>Update My Submission
+                        {% else %}
+                            <span class="mr-2">🚀</span>Submit My Work!
+                        {% endif %}
+                    </button>
+                </form>
+                
+                <!-- Submission Tips -->
+                <div class="mt-6 bg-white bg-opacity-60 p-4 rounded-xl">
+                    <h4 class="font-bold text-gray-700 mb-2 flex items-center">
+                        <span class="text-lg mr-2">💡</span>Submission Tips:
+                    </h4>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li class="flex items-center"><span class="mr-2">✅</span>Double-check your answers before submitting</li>
+                        <li class="flex items-center"><span class="mr-2">📝</span>Make sure your file is clearly readable</li>
+                        <li class="flex items-center"><span class="mr-2">🕒</span>Submit before the deadline to avoid penalties</li>
+                        <li class="flex items-center"><span class="mr-2">🤖</span>AI will automatically grade your submission!</li>
+                    </ul>
                 </div>
-                <button type="submit" class="w-full bg-blue-500 text-white p-3 rounded-xl font-bold text-lg hover:bg-blue-600 transition-colors">
-                    {% if submission %}
-                        Update Submission
-                    {% else %}
-                        Submit Assignment
-                    {% endif %}
-                </button>
-            </form>
+            </div>
         </div>
         {% endif %}
+        
+        <!-- Fun Motivational Section -->
+        <div class="mt-8 text-center p-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl shadow-lg">
+            {% if user_type == 'student' %}
+                {% if submission %}
+                    <div class="text-4xl mb-2">
+                        <span class="emoji-float">🏆</span>
+                    </div>
+                    <p class="text-xl font-bold mb-1">Great Job, Champion!</p>
+                    <p class="text-lg">You've submitted your work! Now relax and wait for the results! 🌟</p>
+                {% else %}
+                    <div class="text-4xl mb-2">
+                        <span class="emoji-float">💪</span>
+                    </div>
+                    <p class="text-xl font-bold mb-1">You've Got This!</p>
+                    <p class="text-lg">Show what you've learned and make yourself proud! 🚀</p>
+                {% endif %}
+            {% else %}
+                <div class="text-4xl mb-2">
+                    <span class="emoji-float">👨‍🏫</span>
+                </div>
+                <p class="text-xl font-bold mb-1">Assignment Created Successfully!</p>
+                <p class="text-lg">Your students are going to love this challenge! 📚</p>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -1,12 +1,50 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="flex justify-center">
-    <div class="bg-pink-100 p-8 rounded-2xl shadow-xl max-w-lg w-full text-center">
-        <h1 class="text-4xl sm:text-5xl font-extrabold text-pink-700 mb-4">Welcome to the Student Portal! 🚀</h1>
-        <p class="text-lg text-pink-600 mb-8">Your colorful platform for managing classes and assignments.</p>
-        <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-            <a href="{{ url_for('signup') }}" class="w-full sm:w-1/2 bg-pink-500 text-white py-3 rounded-xl font-bold text-xl hover:bg-pink-600 transition-colors">Sign Up</a>
-            <a href="{{ url_for('login') }}" class="w-full sm:w-1/2 bg-transparent text-pink-500 border-2 border-pink-500 py-3 rounded-xl font-bold text-xl hover:bg-pink-500 hover:text-white transition-colors">Log In</a>
+    <div class="glass-effect p-8 rounded-3xl shadow-2xl max-w-2xl w-full text-center card-hover">
+        <div class="mb-6">
+            <h1 class="text-5xl sm:text-6xl font-extrabold rainbow-text mb-4">
+                Welcome to StudyHub! 
+                <span class="emoji-float text-6xl">🎓</span>
+            </h1>
+            <p class="text-xl text-gray-700 mb-4 font-medium">
+                Your awesome platform for managing classes and assignments
+            </p>
+            <div class="flex justify-center space-x-2 text-3xl">
+                <span class="emoji-float" style="animation-delay: 0s;">📝</span>
+                <span class="emoji-float" style="animation-delay: 0.2s;">💻</span>
+                <span class="emoji-float" style="animation-delay: 0.4s;">🎯</span>
+                <span class="emoji-float" style="animation-delay: 0.6s;">⭐</span>
+            </div>
+        </div>
+        
+        <div class="space-y-6 mb-8">
+            <div class="bg-white bg-opacity-40 p-4 rounded-2xl">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">✨ What can you do here?</h3>
+                <div class="flex flex-wrap justify-center gap-3 text-sm">
+                    <span class="bg-pink-200 px-3 py-1 rounded-full">📚 Submit Assignments</span>
+                    <span class="bg-blue-200 px-3 py-1 rounded-full">🎯 Track Progress</span>
+                    <span class="bg-green-200 px-3 py-1 rounded-full">🤖 AI Grading</span>
+                    <span class="bg-purple-200 px-3 py-1 rounded-full">👥 Connect with Teachers</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6">
+            <a href="{{ url_for('signup') }}" class="flex-1 bg-gradient-to-r from-pink-500 to-rose-500 text-white py-4 rounded-2xl font-bold text-xl hover:from-pink-600 hover:to-rose-600 transition-all duration-300 btn-fun shadow-lg">
+                <span class="mr-2">🎉</span>Join the Fun!
+            </a>
+            <a href="{{ url_for('login') }}" class="flex-1 bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-2xl font-bold text-xl hover:from-purple-600 hover:to-indigo-600 transition-all duration-300 btn-fun shadow-lg">
+                <span class="mr-2">🚀</span>Let's Go!
+            </a>
+        </div>
+        
+        <div class="mt-6 text-sm text-gray-600">
+            <p class="flex items-center justify-center">
+                <span class="mr-2">🔥</span>
+                Already 1000+ students are using StudyHub!
+                <span class="ml-2">🔥</span>
+            </p>
         </div>
     </div>
 </div>
