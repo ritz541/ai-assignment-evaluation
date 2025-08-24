@@ -26,19 +26,73 @@ def _prepare_image_data(images):
     return image_parts
 
 
-def call_gemini_api_for_evaluation(prompt_text, images):
+def call_deepseek_api_for_summarization(text_content):
     """
-    Calls the Gemini API to evaluate a student's submission.
+    Calls the DeepSeek API to summarize the reference answer text.
+    """
+    @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000, stop_max_attempt_number=5)
+    def _call_with_retry():
+        api_key = os.environ.get("DEEPSEEK_API_KEY", "")
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {api_key}'
+        }
+        
+        prompt = f"""
+        Summarize the following reference answer text into a concise, well-structured json format that can be used for automated grading.
+        The summary should retain all key points and facts.
+        
+        Reference Text:
+        {text_content}
+        """
+
+        payload = {
+            "model": "deepseek-chat",
+            "messages": [
+                {"role": "system", "content": "You are a helpful assistant that summarizes reference materials for grading."},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": 0.5,
+            "response_format": {"type": "json_object"}
+        }
+        
+        print("--- Sending to DeepSeek API for Summarization ---")
+        response = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload)
+        
+        print("--- DeepSeek API Response Status Code ---")
+        print(response.status_code)
+        print("--- DeepSeek API Response Body ---")
+        print(response.text)
+        
+        response.raise_for_status()
+        return response.json()
+
+    try:
+        result = _call_with_retry()
+        if result and 'choices' in result and result['choices']:
+            return result['choices'][0]['message']['content']
+        
+        print("--- Failed to get a valid response from DeepSeek AI. ---")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error calling DeepSeek API: {e}")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON response: {e}")
+        return None
+
+def call_gemini_api_for_evaluation(prompt_text, text_content):
+    """
+    Calls the Gemini API to evaluate a student's submission using only text.
     """
     @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000, stop_max_attempt_number=5)
     def _call_with_retry():
         headers = {'Content-Type': 'application/json'}
         
-        # Prepare parts for the prompt: text + images
         parts = [
-            {'text': prompt_text}
+            {'text': prompt_text},
+            {'text': text_content}
         ]
-        parts.extend(_prepare_image_data(images))
         
         payload = {
             'contents': [{'parts': parts}],
@@ -55,10 +109,17 @@ def call_gemini_api_for_evaluation(prompt_text, images):
             ]
         }
             
-        api_key = os.environ.get("GEMINI_API_KEY", "")
+        api_key = os.environ.get("GEMINI_API_KEY", "sk-96ab9bdc0f614ae8b626ceef58bf21c6")
         params = {'key': api_key}
         
+        print("--- Sending to Gemini API for Evaluation ---")
         response = requests.post(GEMINI_API_URL, headers=headers, json=payload, params=params)
+        
+        print("--- Gemini API Response Status Code ---")
+        print(response.status_code)
+        print("--- Gemini API Response Body ---")
+        print(response.text)
+        
         response.raise_for_status()
         return response.json()
 
@@ -67,37 +128,15 @@ def call_gemini_api_for_evaluation(prompt_text, images):
         if result and 'candidates' in result and result['candidates'] and \
            'content' in result['candidates'][0] and 'parts' in result['candidates'][0]['content']:
             text_response = result['candidates'][0]['content']['parts'][0]['text']
+            print("--- Final AI Text Response (before JSON parsing) ---")
+            print(text_response)
             return json.loads(text_response)
+        
+        print("--- Failed to get a valid response from AI. Check the raw response body above. ---")
         return None
     except requests.exceptions.RequestException as e:
         print(f"Error calling Gemini API: {e}")
         return None
-
-# # Dormant code for DeepSeek API
-# def call_deepseek_api_for_evaluation(prompt_text, images):
-#     """
-#     Calls the DeepSeek API for evaluation. This code is dormant.
-#     """
-#     api_key = os.environ.get("DEEPSEEK_API_KEY", "")
-#     headers = {
-#         'Content-Type': 'application/json',
-#         'Authorization': f'Bearer {api_key}'
-#     }
-    
-#     # In a real implementation, you would need to adjust the payload
-#     # to match DeepSeek's API structure for multimodal input.
-#     # This is a placeholder for a future implementation.
-#     # Example payload structure:
-#     # {
-#     #     "model": "deepseek-v2",
-#     #     "messages": [
-#     #         {"role": "user", "content": [
-#     #             {"type": "text", "text": prompt_text},
-#     #             {"type": "image_url", "image_url": {"url": "base64_encoded_image"}}
-#     #         ]}
-#     #     ]
-#     # }
-#     # response = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload)
-#     
-#     print("DeepSeek API call is dormant and not implemented.")
-#     return None
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON response: {e}")
+        return None
