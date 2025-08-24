@@ -109,7 +109,7 @@ def call_gemini_api_for_evaluation(prompt_text, text_content):
             ]
         }
             
-        api_key = os.environ.get("GEMINI_API_KEY", "sk-96ab9bdc0f614ae8b626ceef58bf21c6")
+        api_key = os.environ.get("GEMINI_API_KEY", "")
         params = {'key': api_key}
         
         print("--- Sending to Gemini API for Evaluation ---")
