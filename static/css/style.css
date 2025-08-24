@@ -1,63 +1,394 @@
+/* Enhanced Bootstrap Styles for StudyHub */
+
+/* Typography and Layout */
+* {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
 body {
     background-color: #f8f9fa;
+    line-height: 1.6;
 }
 
+.main-container {
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+/* Card Enhancements */
 .card {
     border: none;
-    border-radius: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
 }
 
-.nav-tabs .nav-link {
-    font-weight: 600;
-    color: #495057;
-}
-
-.nav-tabs .nav-link.active {
-    border-bottom: 3px solid #0d6efd;
-    color: #0d6efd;
-}
-
-.tab-pane {
-    padding-top: 1rem;
-}
-
-.list-group-item {
-    border-radius: 0.75rem !important;
-    margin-bottom: 0.5rem;
-    transition: transform 0.2s;
-}
-
-.list-group-item:hover {
+.card:hover {
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.12);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1.25rem 1.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.625rem 1.5rem;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+}
+
+.btn-outline-secondary {
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #475569;
+}
+
+.btn-outline-light {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.btn-outline-light:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+/* Form Controls */
+.form-control, .form-select {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.1);
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px 0 0 8px;
+}
+
+/* Page Headers */
+.page-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 0;
+    margin: -2rem -15px 2rem -15px;
+    border-radius: 0 0 24px 24px;
+}
+
+@media (min-width: 768px) {
+    .page-header {
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
+
+/* Stats Cards */
+.stats-card {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card.blue {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.stats-card.green {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.stats-card.orange {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+/* Alert Styles */
+.alert {
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
 }
 
 .alert-success {
-    background-color: #d1e7dd;
-    color: #0f5132;
-    border-color: #badbcc;
+    background-color: #f0fdf4;
+    color: #166534;
+    border-left: 4px solid #22c55e;
+}
+
+.alert-danger {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border-left: 4px solid #ef4444;
+}
+
+.alert-warning {
+    background-color: #fffbeb;
+    color: #92400e;
+    border-left: 4px solid #f59e0b;
 }
 
 .alert-info {
-    background-color: #cff4fc;
-    color: #055160;
-    border-color: #b6effb;
+    background-color: #eff6ff;
+    color: #1e40af;
+    border-left: 4px solid #3b82f6;
 }
 
-.btn-lg {
-    padding: 0.75rem 2rem;
-    font-size: 1.25rem;
-    border-radius: 0.75rem;
+/* Badge Styles */
+.badge {
+    border-radius: 6px;
+    font-weight: 500;
 }
 
-.form-control, .form-select {
-    border-radius: 0.5rem;
+.badge.bg-light {
+    color: #374151 !important;
+    background-color: rgba(255, 255, 255, 0.9) !important;
 }
 
-.form-check-input {
-    border-radius: 0.5rem;
+/* Assignment and Submission Cards */
+.assignment-card {
+    border-left: 4px solid #667eea;
+    transition: all 0.3s ease;
 }
 
-.modal-content {
-    border-radius: 1rem;
+.assignment-card.completed {
+    border-left-color: #22c55e;
+    background-color: #f0fdf4;
+}
+
+.assignment-card.pending {
+    border-left-color: #f59e0b;
+    background-color: #fffbeb;
+}
+
+.submission-card {
+    border-left: 4px solid #3b82f6;
+}
+
+.submission-card.graded {
+    border-left-color: #22c55e;
+    background-color: #f0fdf4;
+}
+
+/* Navigation Elements */
+.back-btn {
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    transition: color 0.2s ease;
+}
+
+.back-btn:hover {
+    color: #334155;
+    text-decoration: none;
+}
+
+/* Flash Messages */
+.flash-messages {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    max-width: 400px;
+}
+
+.flash-messages .alert {
+    margin-bottom: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Text Utilities */
+.text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: #667eea; /* Fallback for browsers that don't support background-clip */
+}
+
+/* Tab Navigation */
+.nav-tabs .nav-link {
+    border: none;
+    color: #64748b;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: transparent;
+    border-bottom: 2px solid #667eea;
+    color: #667eea;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
+    color: #667eea;
+}
+
+/* Form Enhancements */
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.form-check-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+
+/* List Group */
+.list-group-item {
+    border: 1px solid #e9ecef;
+    border-radius: 8px !important;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.list-group-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.list-group-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767.98px) {
+    .main-container {
+        padding: 1rem 0;
+    }
+    
+    .page-header {
+        padding: 1.5rem 0;
+        margin-left: -15px;
+        margin-right: -15px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .stats-card {
+        margin-bottom: 1rem;
+    }
+    
+    .flash-messages {
+        left: 15px;
+        right: 15px;
+        max-width: none;
+    }
+}
+
+/* Animation and Transitions */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card, .alert {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Print Styles */
+@media print {
+    .btn, .flash-messages, .back-btn {
+        display: none !important;
+    }
+    
+    .page-header {
+        background: none !important;
+        color: #000 !important;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #dee2e6 !important;
+    }
+}
+
+/* Accessibility Improvements */
+.btn:focus,
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .card {
+        border: 1px solid #000;
+    }
+    
+    .btn-primary {
+        background: #0000ff;
+        color: #fff;
+    }
+    
+    .btn-success {
+        background: #008000;
+        color: #fff;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }

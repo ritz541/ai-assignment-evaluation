@@ -1,179 +1,164 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="glass-effect p-8 rounded-3xl shadow-2xl max-w-7xl mx-auto w-full">
-    <header class="flex flex-col sm:flex-row justify-between items-center pb-6 mb-8 border-b-2 border-white border-opacity-30">
-        <div class="text-center sm:text-left">
-            <h1 class="text-5xl font-extrabold rainbow-text mb-2">
-                Student Hub 
-                <span class="emoji-float">🎓</span>
-            </h1>
-            <p class="text-2xl text-gray-700 font-medium">
-                Hey there, {{ current_user.username }}! 
-                <span class="emoji-float" style="animation-delay: 0.5s;">✨</span>
-            </p>
-            <div class="flex items-center justify-center sm:justify-start space-x-2 mt-2">
-                <span class="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-lg font-bold px-4 py-2 rounded-full shadow-lg">
-                    🏫 {{ current_user.class_name }}
-                </span>
-                <span class="text-2xl emoji-float" style="animation-delay: 1s;">🚀</span>
-            </div>
-        </div>
-        <a href="{{ url_for('logout') }}" class="mt-4 sm:mt-0 px-8 py-4 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-2xl font-bold text-lg hover:from-red-600 hover:to-pink-600 transition-all duration-300 btn-fun shadow-lg">
-            <span class="mr-2">👋</span>Peace Out!
-        </a>
-    </header>
-    
-    <div class="space-y-8">
-        <!-- Quick Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {% set total_assignments = assignments|length %}
-            {% set completed = submitted_assignment_ids|length %}
-            {% set pending = total_assignments - completed %}
-            
-            <div class="bg-gradient-to-br from-green-400 to-blue-500 p-6 rounded-2xl text-white shadow-lg card-hover">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-2xl font-bold">{{ completed }}</p>
-                        <p class="font-medium">Completed</p>
-                    </div>
-                    <span class="text-4xl">✅</span>
+<div class="page-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="display-5 fw-bold mb-2">Student Dashboard</h1>
+                <p class="lead mb-0">Welcome back, {{ current_user.username }}</p>
+                <div class="mt-2">
+                    <span class="badge bg-light text-dark">
+                        <i class="fas fa-university me-1"></i>{{ current_user.class_name }}
+                    </span>
                 </div>
             </div>
-            
-            <div class="bg-gradient-to-br from-yellow-400 to-orange-500 p-6 rounded-2xl text-white shadow-lg card-hover">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-2xl font-bold">{{ pending }}</p>
-                        <p class="font-medium">Pending</p>
-                    </div>
-                    <span class="text-4xl">⏰</span>
-                </div>
-            </div>
-            
-            <div class="bg-gradient-to-br from-purple-500 to-pink-500 p-6 rounded-2xl text-white shadow-lg card-hover">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-2xl font-bold">{{ total_assignments }}</p>
-                        <p class="font-medium">Total</p>
-                    </div>
-                    <span class="text-4xl">📚</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Assignments Section -->
-        <div class="bg-white bg-opacity-90 p-8 rounded-3xl shadow-lg card-hover">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-4xl font-bold text-gray-800">
-                    <span class="mr-3">📝</span>Your Assignments
-                </h2>
-                {% if pending > 0 %}
-                <span class="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full font-bold animate-pulse">
-                    {{ pending }} pending!
-                </span>
-                {% else %}
-                <span class="bg-gradient-to-r from-green-500 to-blue-500 text-white px-4 py-2 rounded-full font-bold">
-                    All caught up! 🎉
-                </span>
-                {% endif %}
-            </div>
-            
-            <div class="grid gap-6">
-                {% for assignment in assignments %}
-                {% set submitted = assignment.id in submitted_assignment_ids %}
-                <a href="{{ url_for('assignment_detail', assignment_id=assignment.id) }}" 
-                   class="block p-6 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 card-hover
-                          {% if submitted %} 
-                              bg-gradient-to-r from-green-100 to-emerald-100 border-l-4 border-green-500 
-                          {% else %} 
-                              bg-gradient-to-r from-yellow-100 to-amber-100 border-l-4 border-yellow-500 animate-pulse
-                          {% endif %}">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="flex-1">
-                            <div class="flex items-center mb-2">
-                                <h3 class="text-2xl font-bold {% if submitted %} text-green-700 {% else %} text-yellow-700 {% endif %} mr-3">
-                                    {{ assignment.title }}
-                                </h3>
-                                {% if submitted %}
-                                <div class="flex items-center bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                                    <span class="mr-1">✅</span>DONE!
-                                </div>
-                                {% else %}
-                                <div class="flex items-center bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-bounce">
-                                    <span class="mr-1">⚡</span>DO IT!
-                                </div>
-                                {% endif %}
-                            </div>
-                            <p class="text-gray-700 mb-3 text-lg">{{ assignment.description }}</p>
-                            <div class="flex flex-wrap items-center gap-3">
-                                <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                                    📖 {{ assignment.subject }}
-                                </span>
-                                <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                                    🗓️ Due: {{ assignment.due_date }}
-                                </span>
-                            </div>
-                        </div>
-                        <div class="text-6xl">
-                            {% if submitted %}
-                                <span class="emoji-float">🏆</span>
-                            {% else %}
-                                <span class="emoji-float text-yellow-500">⏰</span>
-                            {% endif %}
-                        </div>
-                    </div>
+            <div class="col-auto">
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light">
+                    <i class="fas fa-sign-out-alt me-2"></i>Logout
                 </a>
-                {% else %}
-                <div class="text-center p-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl">
-                    <div class="text-8xl mb-4">
-                        <span class="emoji-float">😴</span>
-                    </div>
-                    <p class="text-2xl font-bold text-gray-600 mb-2">No assignments yet!</p>
-                    <p class="text-lg text-gray-500">Time to chill and relax! Your teachers are probably planning something awesome! 🎉</p>
-                </div>
-                {% endfor %}
             </div>
-        </div>
-
-        <!-- Teachers Section -->
-        <div class="bg-white bg-opacity-90 p-8 rounded-3xl shadow-lg card-hover">
-            <h2 class="text-4xl font-bold text-gray-800 mb-6">
-                <span class="mr-3">👨‍🏫</span>Your Amazing Teachers
-            </h2>
-            {% if teachers %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for teacher in teachers %}
-                <div class="bg-gradient-to-br from-purple-100 to-pink-100 p-6 rounded-2xl shadow-md card-hover border-2 border-purple-200">
-                    <div class="text-center">
-                        <div class="text-5xl mb-3">
-                            <span class="emoji-float">👨‍🏫</span>
-                        </div>
-                        <h3 class="text-xl font-bold text-purple-700 mb-2">{{ teacher.username }}</h3>
-                        <p class="text-purple-600 font-semibold bg-purple-200 px-3 py-1 rounded-full inline-block">
-                            📚 {{ teacher.subject }}
-                        </p>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="text-center p-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl">
-                <div class="text-6xl mb-4">
-                    <span class="emoji-float">🤷‍♂️</span>
-                </div>
-                <p class="text-xl font-bold text-gray-600">No teachers found in your class yet!</p>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Motivational Footer -->
-        <div class="text-center p-6 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl shadow-lg">
-            <div class="text-4xl mb-2">
-                <span class="emoji-float">💪</span>
-            </div>
-            <p class="text-xl font-bold mb-1">Keep Going, Champion!</p>
-            <p class="text-lg">You're doing amazing! Every assignment completed is a step closer to your goals! 🌟</p>
         </div>
     </div>
 </div>
+
+<!-- Quick Stats -->
+<div class="row mb-4">
+    {% set total_assignments = assignments|length %}
+    {% set completed = submitted_assignment_ids|length %}
+    {% set pending = total_assignments - completed %}
+    
+    <div class="col-md-4 mb-3">
+        <div class="stats-card green">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">{{ completed }}</h3>
+                    <small>Completed</small>
+                </div>
+                <i class="fas fa-check-circle fa-2x opacity-75"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="stats-card orange">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">{{ pending }}</h3>
+                    <small>Pending</small>
+                </div>
+                <i class="fas fa-clock fa-2x opacity-75"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="stats-card blue">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">{{ total_assignments }}</h3>
+                    <small>Total Assignments</small>
+                </div>
+                <i class="fas fa-tasks fa-2x opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assignments Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-0">
+                        <i class="fas fa-file-alt me-2"></i>Your Assignments
+                    </h4>
+                </div>
+                {% if pending > 0 %}
+                <span class="badge bg-warning">{{ pending }} pending</span>
+                {% else %}
+                <span class="badge bg-success">All caught up!</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for assignment in assignments %}
+                    {% set submitted = assignment.id in submitted_assignment_ids %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card assignment-card {% if submitted %}completed{% else %}pending{% endif %}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0">{{ assignment.title }}</h5>
+                                    {% if submitted %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>Completed
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-exclamation me-1"></i>Pending
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <p class="card-text text-muted">{{ assignment.description[:100] }}...</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-muted">
+                                            <i class="fas fa-book me-1"></i>{{ assignment.subject }}
+                                        </small>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i>Due: {{ assignment.due_date }}
+                                        </small>
+                                    </div>
+                                    <a href="{{ url_for('assignment_detail', assignment_id=assignment.id) }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>View
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="col-12">
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No assignments yet</h5>
+                            <p class="text-muted">Check back later for new assignments from your teachers.</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Teachers Section -->
+{% if teachers %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>Your Teachers
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for teacher in teachers %}
+                    <div class="col-md-4 col-lg-3 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <i class="fas fa-user-tie fa-2x text-primary mb-2"></i>
+                                <h6 class="card-title">{{ teacher.username }}</h6>
+                                <small class="text-muted">{{ teacher.subject }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

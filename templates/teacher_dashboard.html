@@ -1,184 +1,172 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="glass-effect p-8 rounded-3xl shadow-2xl max-w-7xl mx-auto w-full">
-    <header class="flex flex-col sm:flex-row justify-between items-center pb-6 mb-8 border-b-2 border-white border-opacity-30">
-        <div class="text-center sm:text-left">
-            <h1 class="text-5xl font-extrabold rainbow-text mb-2">
-                Teacher Command Center 
-                <span class="emoji-float">👨‍🏫</span>
-            </h1>
-            <p class="text-2xl text-gray-700 font-medium">
-                Welcome back, Prof. {{ current_user.username }}! 
-                <span class="emoji-float" style="animation-delay: 0.5s;">⭐</span>
-            </p>
-            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-3">
-                <span class="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-lg font-bold px-4 py-2 rounded-full shadow-lg">
-                    🏫 {{ current_user.class_name }}
-                </span>
-                <span class="bg-gradient-to-r from-purple-500 to-pink-600 text-white text-lg font-bold px-4 py-2 rounded-full shadow-lg">
-                    📚 {{ current_user.subject }}
-                </span>
-                <span class="text-2xl emoji-float" style="animation-delay: 1s;">🚀</span>
-            </div>
-        </div>
-        <a href="{{ url_for('logout') }}" class="mt-4 sm:mt-0 px-8 py-4 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-2xl font-bold text-lg hover:from-red-600 hover:to-pink-600 transition-all duration-300 btn-fun shadow-lg">
-            <span class="mr-2">👋</span>See Ya Later!
-        </a>
-    </header>
-
-    <div class="space-y-8">
-        <!-- Quick Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {% set total_assignments = assignments|length %}
-            {% set total_students = students|length %}
-            
-            <div class="bg-gradient-to-br from-blue-400 to-purple-500 p-6 rounded-2xl text-white shadow-lg card-hover">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-2xl font-bold">{{ total_assignments }}</p>
-                        <p class="font-medium">Assignments</p>
-                    </div>
-                    <span class="text-4xl">📝</span>
+<div class="page-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="display-5 fw-bold mb-2">Teacher Dashboard</h1>
+                <p class="lead mb-0">Welcome back, {{ current_user.username }}</p>
+                <div class="mt-2">
+                    <span class="badge bg-light text-dark me-2">
+                        <i class="fas fa-university me-1"></i>{{ current_user.class_name }}
+                    </span>
+                    <span class="badge bg-light text-dark">
+                        <i class="fas fa-book me-1"></i>{{ current_user.subject }}
+                    </span>
                 </div>
             </div>
-            
-            <div class="bg-gradient-to-br from-green-400 to-blue-500 p-6 rounded-2xl text-white shadow-lg card-hover">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-2xl font-bold">{{ total_students }}</p>
-                        <p class="font-medium">Students</p>
-                    </div>
-                    <span class="text-4xl">🎓</span>
-                </div>
-            </div>
-            
-            <div class="bg-gradient-to-br from-yellow-400 to-orange-500 p-6 rounded-2xl text-white shadow-lg card-hover">
-                <div class="flex items-center justify-between">
-                    <div>
-                        {% set total_submissions = assignment_stats.values() | map(attribute='submitted') | sum %}
-                        <p class="text-2xl font-bold">{{ total_submissions }}</p>
-                        <p class="font-medium">Submissions</p>
-                    </div>
-                    <span class="text-4xl">✅</span>
-                </div>
-            </div>
-            
-            <div class="bg-gradient-to-br from-pink-400 to-red-500 p-6 rounded-2xl text-white shadow-lg card-hover">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-2xl font-bold">🤖</p>
-                        <p class="font-medium">AI Powered</p>
-                    </div>
-                    <span class="text-4xl">⚡</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Assignments Section -->
-        <div class="bg-white bg-opacity-90 p-8 rounded-3xl shadow-lg card-hover">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-                <h2 class="text-4xl font-bold text-gray-800">
-                    <span class="mr-3">📚</span>Your Assignments
-                </h2>
-                <a href="{{ url_for('create_assignment') }}" class="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 btn-fun shadow-lg">
-                    <span class="mr-2">➕</span>Create Magic!
+            <div class="col-auto">
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light">
+                    <i class="fas fa-sign-out-alt me-2"></i>Logout
                 </a>
             </div>
-            
-            <div class="space-y-6">
-                {% for assignment in assignments %}
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 card-hover border-l-4 border-blue-500">
-                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                        <div class="flex-1">
-                            <div class="flex flex-wrap items-center gap-3 mb-3">
-                                <h3 class="text-2xl font-bold text-blue-700">{{ assignment.title }}</h3>
-                                <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                                    🗓️ Due: {{ assignment.due_date }}
-                                </span>
-                            </div>
-                            <p class="text-gray-700 mb-4 text-lg">{{ assignment.description }}</p>
-                            
-                            <div class="flex flex-wrap items-center gap-4">
-                                <div class="flex items-center space-x-4">
-                                    <div class="flex items-center bg-green-100 px-3 py-2 rounded-full">
-                                        <span class="text-green-600 font-bold mr-2">✅</span>
-                                        <span class="text-green-700 font-semibold">{{ assignment_stats[assignment.id].submitted }} submitted</span>
-                                    </div>
-                                    <div class="flex items-center bg-yellow-100 px-3 py-2 rounded-full">
-                                        <span class="text-yellow-600 font-bold mr-2">⏰</span>
-                                        <span class="text-yellow-700 font-semibold">{{ assignment_stats[assignment.id].pending }} pending</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex flex-col sm:flex-row items-center gap-3">
-                            <div class="text-5xl">
-                                <span class="emoji-float">📊</span>
-                            </div>
-                            <a href="{{ url_for('view_submissions', assignment_id=assignment.id) }}" 
-                               class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-bold hover:from-purple-600 hover:to-pink-700 transition-all duration-300 btn-fun shadow-lg">
-                                <span class="mr-2">👀</span>Check Submissions
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                {% else %}
-                <div class="text-center p-12 bg-gradient-to-br from-gray-100 to-blue-100 rounded-2xl">
-                    <div class="text-8xl mb-4">
-                        <span class="emoji-float">🎨</span>
-                    </div>
-                    <p class="text-2xl font-bold text-gray-600 mb-2">No assignments yet!</p>
-                    <p class="text-lg text-gray-500 mb-6">Time to create some awesome assignments for your students! 🚀</p>
-                    <a href="{{ url_for('create_assignment') }}" class="inline-block px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 btn-fun shadow-lg">
-                        <span class="mr-2">✨</span>Create Your First Assignment!
-                    </a>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- Students Section -->
-        <div class="bg-white bg-opacity-90 p-8 rounded-3xl shadow-lg card-hover">
-            <h2 class="text-4xl font-bold text-gray-800 mb-6">
-                <span class="mr-3">🎓</span>Your Awesome Students
-            </h2>
-            
-            {% if students %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {% for student in students %}
-                <div class="bg-gradient-to-br from-purple-100 to-pink-100 p-6 rounded-2xl shadow-md card-hover border-2 border-purple-200">
-                    <div class="text-center">
-                        <div class="text-5xl mb-3">
-                            <span class="emoji-float">🧑‍🎓</span>
-                        </div>
-                        <h3 class="text-lg font-bold text-purple-700 mb-2">{{ student.username }}</h3>
-                        <p class="text-purple-600 font-semibold bg-purple-200 px-3 py-1 rounded-full text-sm">
-                            Future Star ⭐
-                        </p>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="text-center p-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl">
-                <div class="text-6xl mb-4">
-                    <span class="emoji-float">🤷‍♂️</span>
-                </div>
-                <p class="text-xl font-bold text-gray-600">No students in your class yet!</p>
-                <p class="text-gray-500 mt-2">They'll join soon and you'll have an amazing class! 🌟</p>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Motivational Footer -->
-        <div class="text-center p-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl shadow-lg">
-            <div class="text-4xl mb-2">
-                <span class="emoji-float">🌟</span>
-            </div>
-            <p class="text-xl font-bold mb-1">Keep Inspiring, Educator!</p>
-            <p class="text-lg">You're shaping the future, one student at a time! Your dedication makes all the difference! 🎯</p>
         </div>
     </div>
 </div>
+
+<!-- Quick Stats -->
+<div class="row mb-4">
+    {% set total_assignments = assignments|length %}
+    {% set total_students = students|length %}
+    {% set total_submissions = assignment_stats.values() | map(attribute='submitted') | sum %}
+    
+    <div class="col-md-3 mb-3">
+        <div class="stats-card blue">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">{{ total_assignments }}</h3>
+                    <small>Assignments</small>
+                </div>
+                <i class="fas fa-file-alt fa-2x opacity-75"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="stats-card green">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">{{ total_students }}</h3>
+                    <small>Students</small>
+                </div>
+                <i class="fas fa-users fa-2x opacity-75"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="stats-card orange">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">{{ total_submissions }}</h3>
+                    <small>Submissions</small>
+                </div>
+                <i class="fas fa-paper-plane fa-2x opacity-75"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0"><i class="fas fa-robot"></i></h3>
+                    <small>AI Powered</small>
+                </div>
+                <i class="fas fa-magic fa-2x opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assignments Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-0">
+                        <i class="fas fa-file-alt me-2"></i>Your Assignments
+                    </h4>
+                </div>
+                <a href="{{ url_for('create_assignment') }}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Create Assignment
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for assignment in assignments %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card assignment-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0">{{ assignment.title }}</h5>
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-calendar me-1"></i>{{ assignment.due_date }}
+                                    </span>
+                                </div>
+                                <p class="card-text text-muted">{{ assignment.description[:100] }}...</p>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex gap-2">
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>{{ assignment_stats[assignment.id].submitted }}
+                                        </span>
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-clock me-1"></i>{{ assignment_stats[assignment.id].pending }}
+                                        </span>
+                                    </div>
+                                    <a href="{{ url_for('view_submissions', assignment_id=assignment.id) }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>View Submissions
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="col-12">
+                        <div class="text-center py-5">
+                            <i class="fas fa-plus-circle fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No assignments yet</h5>
+                            <p class="text-muted">Create your first assignment to get started.</p>
+                            <a href="{{ url_for('create_assignment') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Create Your First Assignment
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Students Section -->
+{% if students %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-users me-2"></i>Your Students
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for student in students %}
+                    <div class="col-md-4 col-lg-3 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <i class="fas fa-user-graduate fa-2x text-primary mb-2"></i>
+                                <h6 class="card-title">{{ student.username }}</h6>
+                                <small class="text-muted">Student</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
