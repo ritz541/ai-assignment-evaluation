@@ -356,7 +356,7 @@ def register_routes(app):
             
             gemini_response = call_gemini_api_for_evaluation(
                 prompt_text=prompt,
-                text_content="" # We pass an empty string as we are using text-only input
+                text_content=student_text  # Now passing the extracted text
             )
             
             if gemini_response:
